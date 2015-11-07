@@ -6,8 +6,8 @@
 # 'jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
-title: Your awesome title
-email: your-email@domain.com
+title: BTL Documentation
+email: n@p12a.org.uk
 description: > # this means to ignore newlines until "baseurl:"
   Documentation for my toy language.
 baseurl: "/btl" # the subpath of your site, e.g. /blog
