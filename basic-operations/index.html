@@ -6,12 +6,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>BTL Documentation</title>
+  <title>Basic Operations</title>
   <meta name="description" content="Documentation for my toy language.
 ">
 
   <link rel="stylesheet" href="/btl/css/main.css">
-  <link rel="canonical" href="http://nbaum.github.io/btl/">
+  <link rel="canonical" href="http://nbaum.github.io/btl/basic-operations/">
   <link rel="alternate" type="application/rss+xml" title="BTL Documentation" href="http://nbaum.github.io/btl/feed.xml">
 </head>
 
@@ -59,25 +59,62 @@
 
     <div class="page-content">
       <div class="wrapper">
-        <div class="home">
+        <article class="post">
 
-  <h1 class="page-heading">Posts</h1>
+  <header class="post-header">
+    <h1 class="post-title">Basic Operations</h1>
+  </header>
 
-  <ul class="post-list">
-    
-      <li>
-        <span class="post-meta">Nov 7, 2015</span>
+  <div class="post-content">
+    <h2 id="maths">Maths</h2>
 
-        <h2>
-          <a class="post-link" href="/btl/jekyll/update/2015/11/07/welcome-to-jekyll.html">Welcome to Jekyll!</a>
-        </h2>
-      </li>
-    
-  </ul>
+<h3 id="num">(+ num…)</h3>
 
-  <p class="rss-subscribe">subscribe <a href="/btl/feed.xml">via RSS</a></p>
+<p>Returns the sum of the arguments.</p>
 
-</div>
+<p>With no arguments, returns 0.</p>
+
+<h3 id="num-1">(- num…)</h3>
+
+<p>Returns the sum of the rest of the arguments subtracted from the first argument.</p>
+
+<p>With no arguments, returns 0.</p>
+
+<h3 id="num-2">(* num…)</h3>
+
+<p>Returns the product of the arguments.</p>
+
+<p>With no arguments, returns 1.</p>
+
+<h3 id="num-3">(/ num…)</h3>
+
+<p>Returns the cumulative division of the arguments.</p>
+
+<p>With one argument, return its reciprocal.</p>
+
+<p>With no arguments, returns 1.</p>
+
+<h3 id="mod-num">(mod num…)</h3>
+
+<p>Returns the cumulative remainder of the arguments.</p>
+
+<p>With zero or one arguments, returns 1.</p>
+
+<h3 id="num-4">(&lt; num…)</h3>
+
+<p>Returns the first argument if every argument is less-than the previous argument.</p>
+
+<p>With no arguments, returns positive infinity.</p>
+
+<h3 id="num-5">(&gt; num…)</h3>
+
+<p>Returns the first argument if every argument is greater-than the previous argument.</p>
+
+<p>With no arguments, returns negative infinity.</p>
+
+  </div>
+
+</article>
 
       </div>
     </div>
