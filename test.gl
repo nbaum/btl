@@ -1,0 +1,11 @@
+; comment
+atom
+()
+(atom)
+(atom atom atom)
+'atom
+'(quoted)
+'(quoted list)
+`(quasiquote)
+`quasiquote
+`(,unquote ,@unquote-splicing)
