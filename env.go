@@ -41,7 +41,7 @@ func (e *Env) Bind(names Value, values Value) error {
 					e.Bind(next, values.Cdr)
 					break
 				} else {
-					return fmt.Errorf("in parameters, unexpected sym or list, but found: %s", names.Cdr)
+					return fmt.Errorf("in parameters, expected sym or list, but found: %s", names.Cdr)
 				}
 				if values.Cdr == nil {
 					if names != nil {
@@ -51,14 +51,14 @@ func (e *Env) Bind(names Value, values Value) error {
 				} else if next, ok := values.Cdr.(*Cons); ok {
 					values = next
 				} else {
-					return fmt.Errorf("in parameters, unexpected list, but found: %s", values.Cdr)
+					return fmt.Errorf("in parameters, expected list, but found: %s", values.Cdr)
 				}
 			}
 		} else {
-			return fmt.Errorf("in parameters, unexpected list, but found: %s", values)
+			return fmt.Errorf("in parameters, expected list, but found: %s", values)
 		}
 	} else {
-		return fmt.Errorf("in parameters, unexpected sym or list, but found: %s", names)
+		return fmt.Errorf("in parameters, expected sym or list, but found: %s", names)
 	}
 	return nil
 }
