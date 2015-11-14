@@ -1,29 +1,37 @@
 package main
 
 import (
-    "io"
-    "fmt"
-    "log"
-    "io/ioutil"
-    flag "github.com/ogier/pflag"
-    . "github.com/nbaum/golem"
-  )
+  "io"
+  "os"
+  "fmt"
+  "log"
+  "bufio"
+  flag "github.com/ogier/pflag"
+  . "github.com/nbaum/golem"
+)
 
 func main () {
   flag.Parse()
-  b, err := ioutil.ReadFile(flag.Args()[0])
+  b, err := os.Open(flag.Args()[0])
+  env := NewEnvDefault()
   if err != nil {
     log.Fatal(err)
   }
-  p := NewParser(b)
+  r := bufio.NewReader(b)
   for {
-    val, err := p.Parse()
+    form, err := Read(r)
     if err == io.EOF {
-      break;
+      break
+    } else if err != nil {
+      fmt.Println(err)
+      continue
+    }
+    fmt.Printf("> %s\n", form)
+    val, err := form.Eval(env)
+    if err != nil {
+      fmt.Println(err)
+      continue
     }
     fmt.Println(val)
-    if err != nil {
-      log.Fatal(err)
-    }
   }
 }

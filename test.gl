@@ -1,11 +1,3 @@
-; comment
-atom
-()
-(atom)
-(atom atom atom)
-'atom
-'(quoted)
-'(quoted list)
-`(quasiquote)
-`quasiquote
-`(,unquote ,@unquote-splicing)
+(assign list (fn args args))
+(assign cons (fn (car cdr) (list car . cdr)))
+(cons 1 2)
