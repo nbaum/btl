@@ -1,0 +1,17 @@
+PATH
+  remote: .
+  specs:
+    golem (0.0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  golem!
+
+BUNDLED WITH
+   1.10.6

@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+require 'golem'
+
+until ARGV.empty?
+  reader = Golem::Reader.new(File.read(ARGV.shift))
+  until reader.eos?
+    puts reader.read.disp
+  end
+end

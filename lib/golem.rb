@@ -1,0 +1,6 @@
+require "golem/cons"
+require "golem/reader"
+require "golem/symbol"
+require "golem/string"
+require "golem/numeric"
+require "golem/nil"
