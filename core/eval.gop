@@ -1,0 +1,37 @@
+package core
+
+import "fmt"
+
+func (e *Env) Apply (fn Value, args Value) (res Value, err error) {
+  switch fn := fn.(type) {
+  case Sym:
+    var fn2 Value
+    fn2, ^err = e.Eval(fn)
+    if fn == fn2 {
+      ^err = fmt.Errorf("Can't apply a self-bound symbol")
+    }
+    return e.Apply(fn2, args)
+  case Special:
+    if args, ok := args.(*Cons); !ok {
+      ^err = fmt.Errorf("%s doesn't accept non-cons argument", fn)
+    } else {
+      return fn(e, args)
+    }
+  default:
+    ^err = fmt.Errorf("Don't know how to apply a %T", fn)
+  }
+  return
+}
+
+func (e *Env) Eval (form Value) (res Value, err error) {
+  switch form := form.(type) {
+  default:
+    ^err = fmt.Errorf("Don't know how to eval a %T", form)
+  case Sym:
+    return e.Get(string(form))
+  case *Cons:
+    res, ^err = e.Eval(form.car)
+    return e.Apply(res, form.cdr)
+  }
+  return
+}

@@ -1,4 +1,1 @@
-(assign list (fn args args))
-(assign cons (fn (car cdr) (list car . cdr)))
-(cons 1 2)
-(fsad
+(assign x '12 y '14)

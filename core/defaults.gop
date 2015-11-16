@@ -1,0 +1,32 @@
+package core
+
+import "fmt"
+
+func f_assign (env *Env, args *Cons) (res Value, err error) {
+  var ok bool
+  var name, value Value
+  for args != nil {
+    name, args, ^err = args.Next()
+    value, args, ^err = args.Next()
+    value, ^err = env.Eval(value)
+    name, ^^ok = name.(Sym)
+  }
+  return value, nil
+}
+
+func f_quote (env *Env, args *Cons) (res Value, err error) {
+  res, args, ^err = args.Next()
+  if args != nil {
+    ^err = fmt.Errorf("too many arguments to quote")
+  }
+  return
+}
+
+func NewDefaultEnv () *Env {
+  env := NewEnv(nil)
+  env.LetSpecial("assign", f_assign)
+  env.LetSpecial("quote", f_quote)
+  env.Let("nil", Intern("nil"))
+  env.Let("t", Intern("t"))
+  return env
+}
