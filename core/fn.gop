@@ -1,5 +1,28 @@
 package core
 
-type Fn func (*Env, *Cons) (Value, error)
-type Special func (*Env, *Cons) (Value, error)
-type Macro func (*Env, *Cons) (Value, error)
+import "fmt"
+
+type Fn struct {
+  proc func (*Env, Value) (Value, error)
+  name string
+}
+
+func NewFn (name string, proc func (*Env, Value) (Value, error)) *Fn {
+  return &Fn{proc, name}
+}
+
+func (f *Fn) String () string {
+  if f.name != "" {
+    return fmt.Sprintf("#<fn %s>", f.name)
+  } else {
+    return fmt.Sprintf("#<fn>")
+  }
+}
+
+func (f *Fn) Name () string {
+  return f.name
+}
+
+func (f *Fn) SetName (name string) {
+  f.name = name
+}

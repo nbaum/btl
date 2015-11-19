@@ -1,0 +1,131 @@
+package core
+
+func f_add (env *Env, args Value) (res Value, err error) {
+  if args == nil {
+    return Int(0), nil
+  }
+  res, args, ^err = Next(args)
+  for args != nil {
+    var num Value
+    num, args, ^err = Next(args)
+    switch acc := res.(type) {
+    case Int:
+      switch num := num.(type) {
+      case Int:
+        res = Int(acc + num)
+      case Float:
+        res = Float(Float(acc) + num)
+      }
+    case Float:
+      switch num := num.(type) {
+      case Int:
+        res = Float(acc + Float(num))
+      case Float:
+        res = Float(acc + num)
+      }
+    }
+  }
+  return
+}
+
+func f_sub (env *Env, args Value) (res Value, err error) {
+  if args == nil {
+    return Int(0), nil
+  }
+  res, args, ^err = Next(args)
+  if args == nil {
+    switch acc := res.(type) {
+    case Int:
+      res = Int(-acc)
+    case Float:
+      res = Float(-acc)
+    }
+    return
+  }
+  for args != nil {
+    var num Value
+    num, args, ^err = Next(args)
+    switch acc := res.(type) {
+    case Int:
+      switch num := num.(type) {
+      case Int:
+        res = Int(acc - num)
+      case Float:
+        res = Float(Float(acc) - num)
+      }
+    case Float:
+      switch num := num.(type) {
+      case Int:
+        res = Float(acc - Float(num))
+      case Float:
+        res = Float(acc - num)
+      }
+    }
+  }
+  return
+}
+
+func f_mul (env *Env, args Value) (res Value, err error) {
+  if args == nil {
+    return Int(1), nil
+  }
+  res, args, ^err = Next(args)
+  for args != nil {
+    var num Value
+    num, args, ^err = Next(args)
+    switch acc := res.(type) {
+    case Int:
+      switch num := num.(type) {
+      case Int:
+        res = Int(acc * num)
+      case Float:
+        res = Float(Float(acc) * num)
+      }
+    case Float:
+      switch num := num.(type) {
+      case Int:
+        res = Float(acc * Float(num))
+      case Float:
+        res = Float(acc * num)
+      }
+    }
+  }
+  return
+}
+
+func f_div (env *Env, args Value) (res Value, err error) {
+  if args == nil {
+    return Int(1), nil
+  }
+  res, args, ^err = Next(args)
+  if args == nil {
+    switch acc := res.(type) {
+    case Int:
+      res = Int(1 / acc)
+    case Float:
+      res = Float(1.0 / acc)
+    }
+    return
+  }
+  for args != nil {
+    var num Value
+    num, args, ^err = Next(args)
+    switch acc := res.(type) {
+    case Int:
+      switch num := num.(type) {
+      case Int:
+        res = Int(acc / num)
+      case Float:
+        res = Float(Float(acc) / num)
+      }
+    case Float:
+      switch num := num.(type) {
+      case Int:
+        res = Float(acc / Float(num))
+      case Float:
+        res = Float(acc / num)
+      }
+    }
+  }
+  return
+}

@@ -1,0 +1,39 @@
+package core
+
+import (
+  "runtime"
+)
+
+type Result struct {
+  ok Value
+  ko error
+}
+
+func f_catch (env *Env, args Value) (res Value, err error) {
+  var vec []Value
+  vec, ^err = UnpackArgs(args, 1, 1)
+  channel := make(chan Result)
+  fn := NewFn("", func (env *Env, args Value) (res Value, err error) {
+    res, args, ^err = Next(args)
+    channel <- Result{res, nil}
+    runtime.Goexit()
+    return
+  })
+  go func() {
+    res, err := env.Apply(vec[0], NewCons(fn, nil))
+    channel <- Result{res, err}
+    return
+  }()
+  result := <-channel
+  return result.ok, result.ko
+}
+
+func f_finally (env *Env, args Value) (res Value, err error) {
+  var vec []Value
+  vec, ^err = UnpackArgs(args, 2, 2)
+  defer func () {
+    r := recover()
+    _, ^err = env.Apply(vec[1], NewCons(r, nil))
+  }()
+  return env.Apply(vec[0], nil)
+}

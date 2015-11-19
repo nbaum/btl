@@ -1,0 +1,6 @@
+baseurl = "http://replace-this-with-your-hugo-site.com/"
+languageCode = "en-us"
+title = "Golem"
+
+[params]
+  description = "A flexible programming language in the lisp family"

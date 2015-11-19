@@ -15,7 +15,7 @@ func (c *Cons) String() string {
 		s += fmt.Sprint(v)
 		return nil
 	}
-	c.Each(helper)
+	Each(c, helper)
 	s += ")"
 	return s
 }

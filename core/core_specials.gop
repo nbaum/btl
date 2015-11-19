@@ -1,0 +1,66 @@
+package core
+
+import "fmt"
+
+func f_fn (env *Env, args Value) (res Value, err error) {
+  var forms Value
+  args, forms, ^err = Next(args)
+  res = NewFn("", func (fenv *Env, fargs Value) (res Value, err error) {
+    env2 := NewEnv(env)
+    env2.Let("caller", fenv)
+    ^err = env2.Bind(args, fargs)
+    ^err = Each(forms, func (form Value, _ bool) (err error) {
+      res, ^err = env2.Eval(form)
+      return
+    })
+    return
+  })
+  return
+}
+
+func f_assign (env *Env, args Value) (res Value, err error) {
+  vec := ToArray(args)
+  if len(vec) % 2 == 1 {
+    ^err = fmt.Errorf("assign expects even number of arguments")
+  }
+  for i := 0; i < len(vec) - 1; i += 2 {
+    if name, ok := vec[i].(Sym); !ok {
+      ^err = fmt.Errorf("not a symbol: %s", name)
+    }
+  }
+  for i := 0; i < len(vec) - 1; i += 2 {
+    vec[i + 1], ^err = env.Eval(vec[i + 1])
+  }
+  for i := 0; i < len(vec) - 1; i += 2 {
+    res = vec[i + 1]
+    env.Set(string(vec[i].(Sym)), res)
+  }
+  return
+}
+
+func f_if (env *Env, args Value) (res Value, err error) {
+  var cond, then Value
+  for args != nil {
+    cond, args, ^err = Next(args)
+    if args == nil {
+      res, ^err = env.Eval(cond)
+      return
+    } else {
+      cond, ^err = env.Eval(cond)
+      then, args, ^err = Next(args)
+      if cond != nil {
+        res, ^err = env.Eval(then)
+        return
+      }
+    }
+  }
+  return
+}
+
+func f_quote (env *Env, args Value) (res Value, err error) {
+  res, args, ^err = Next(args)
+  if args != nil {
+    ^err = fmt.Errorf("too many arguments to quote")
+  }
+  return
+}

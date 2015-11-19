@@ -1,0 +1,11 @@
+package core
+
+func f_consp (e *Env, args Value) (res Value, err error) {
+  var vec []Value
+  vec, ^err = UnpackArgs(args, 1, 1)
+  if _, ok := vec[0].(*Cons); ok {
+    return res, nil
+  } else {
+    return nil, nil
+  }
+}

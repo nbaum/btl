@@ -4,19 +4,21 @@ import "fmt"
 
 func (e *Env) Apply (fn Value, args Value) (res Value, err error) {
   switch fn := fn.(type) {
-  case Sym:
-    var fn2 Value
-    fn2, ^err = e.Eval(fn)
-    if fn == fn2 {
-      ^err = fmt.Errorf("Can't apply a self-bound symbol")
+  case *Env:
+    res, args, ^err = Next(args)
+    return fn.Eval(res)
+  case *Fn:
+    return fn.proc(e, args)
+  case *Table:
+    var key Value
+    key, args, ^err = Next(args)
+    if args != nil {
+      ^err = fmt.Errorf("Excess parameters for table access: %s", args)
     }
-    return e.Apply(fn2, args)
-  case Special:
-    if args, ok := args.(*Cons); !ok {
-      ^err = fmt.Errorf("%s doesn't accept non-cons argument", fn)
-    } else {
-      return fn(e, args)
+    if res, ok := (*fn)[key]; ok {
+      return res, nil
     }
+    ^err = fmt.Errorf("No such key: %s", key)
   default:
     ^err = fmt.Errorf("Don't know how to apply a %T", fn)
   }
@@ -26,12 +28,31 @@ func (e *Env) Apply (fn Value, args Value) (res Value, err error) {
 func (e *Env) Eval (form Value) (res Value, err error) {
   switch form := form.(type) {
   default:
-    ^err = fmt.Errorf("Don't know how to eval a %T", form)
+    return form, nil
+  case *Vec:
+    ary := Vec(make([]Value, len(*form)))
+    for i, elem := range *form {
+      ary[i], ^err = e.Eval(elem)
+    }
+    res = &ary
   case Sym:
     return e.Get(string(form))
   case *Cons:
     res, ^err = e.Eval(form.car)
-    return e.Apply(res, form.cdr)
+    switch fn := res.(type) {
+    case *Tagged:
+      if fn.tag == SpecialTag {
+        return e.Apply(fn.datum, form.cdr)
+      } else if fn.tag == MacroTag {
+        res, ^err = e.Apply(fn.datum, form.cdr)
+        return e.Eval(res)
+      } else {
+        res = fn.datum
+      }
+    }
+    args := form.cdr
+    args, ^err = Map(args, e.Eval)
+    return e.Apply(res, args)
   }
   return
 }

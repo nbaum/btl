@@ -4,6 +4,7 @@ import (
   "io"
   "fmt"
   "unicode"
+  "strconv"
   "strings"
 )
 
@@ -51,7 +52,26 @@ again:
 
 var dot = &Handle{}
 
-func (s *Scanner) readList () (val *Cons, err error) {
+func (s *Scanner) readString () (val Value, err error) {
+  var r rune
+  buff := ""
+  for {
+    r, ^err = s.get()
+    switch r {
+    case -1:
+      return nil, io.EOF
+    case '"':
+      return Str(buff), nil
+    case '\\':
+      r, ^err = s.get()
+      fallthrough
+    default:
+      buff += string(r)
+    }
+  }
+}
+
+func (s *Scanner) readList (end rune) (val *Cons, err error) {
   var r rune
   val = List(nil)
   val.car, ^err = s.ReadForm()
@@ -62,7 +82,7 @@ func (s *Scanner) readList () (val *Cons, err error) {
     switch r {
     case -1:
       ^err = io.EOF
-    case ')':
+    case end:
       return
     default:
       var item Value
@@ -81,8 +101,28 @@ func (s *Scanner) readList () (val *Cons, err error) {
   }
 }
 
+func (s *Scanner) readVector () (val *Vec, err error) {
+  var r rune
+  vec := Vec([]Value{})
+  for {
+    ^err = s.chomp()
+    r, ^err = s.get()
+    switch r {
+    case -1:
+      ^err = io.EOF
+    case ')':
+      return &vec, nil
+    default:
+      var item Value
+      ^err = s.unget()
+      item, ^err = s.ReadForm()
+      vec = append(vec, item)
+    }
+  }
+}
+
 func (s *Scanner) isAtomRune (r rune) bool {
-  return !strings.ContainsRune("()'`,;#", r) && !unicode.IsSpace(r)
+  return !strings.ContainsRune("()[]{}'`,;#\"", r) && !unicode.IsSpace(r)
 }
 
 func (s *Scanner) ReadForm () (val Value, err error) {
@@ -94,9 +134,17 @@ func (s *Scanner) ReadForm () (val Value, err error) {
     return nil, io.EOF
   case '(':
     if s.peek() == ')' {
+      s.get()
       return nil, nil
     } else {
-      return s.readList()
+      return s.readList(')')
+    }
+  case '[':
+    if s.peek() == ']' {
+      return List(Intern("fn"), List(Intern("_"))), nil
+    } else {
+      val, ^err = s.readList(']')
+      return NewCons(Intern("fn"), NewCons(List(Intern("_")), val)), nil
     }
   case '`':
     val, ^err = s.ReadForm()
@@ -113,13 +161,25 @@ func (s *Scanner) ReadForm () (val Value, err error) {
     val, ^err = s.ReadForm()
     return List(Intern("quote"), val), nil
   case '#':
-    ^err = fmt.Errorf("# not handled yet")
+    r, ^err = s.get()
+    switch r {
+    case '(':
+      val, ^err = s.readVector()
+    default:
+      ^err = fmt.Errorf("#%c not handled yet", r)
+    }
+  case '"':
+    return s.readString()
   case '.':
     if r2 := s.peek(); !s.isAtomRune(r2) {
       return dot, nil
     }
     fallthrough
   default:
+    if !s.isAtomRune(r) {
+      ^err = fmt.Errorf("unexpected `%c'", r)
+      return
+    }
     atom := string(r)
     for {
       if r, ^err = s.get(); s.isAtomRune(r) {
@@ -129,7 +189,17 @@ func (s *Scanner) ReadForm () (val Value, err error) {
         break
       }
     }
-    return Intern(atom), nil
+    return processAtom(atom), nil
   }
   return
+}
+
+func processAtom (atom string) (res Value) {
+  if val, err := strconv.ParseInt(atom, 0, 64); err == nil {
+    return Int(val)
+  } else if val, err := strconv.ParseFloat(atom, 64); err == nil {
+    return Float(val)
+  } else {
+    return Intern(atom)
+  }
 }

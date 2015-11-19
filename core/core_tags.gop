@@ -1,0 +1,21 @@
+package core
+
+import (
+  "fmt"
+)
+
+func f_tag (env *Env, args Value) (res Value, err error) {
+  var vec []Value
+  vec, ^err = UnpackArgs(args, 2, 2)
+  return Tag(vec[0], vec[1]), nil
+}
+
+func f_untag (env *Env, args Value) (res Value, err error) {
+  var vec []Value
+  vec, ^err = UnpackArgs(args, 1, 1)
+  if tagged, ok := vec[0].(*Tagged); !ok {
+    return nil, fmt.Errorf("untag expects a tagged")
+  } else {
+    return NewCons(tagged.tag, tagged.datum), nil
+  }
+}

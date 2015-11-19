@@ -1,49 +1,101 @@
+//line ./core/eval.gop:1
 package core
+//line ./core/eval.gop:4
 
+//line ./core/eval.gop:3
 import "fmt"
+//line ./core/eval.gop:6
 
+//line ./core/eval.gop:5
 func (e *Env) Apply(fn Value, args Value) (res Value, err error) {
 	switch fn := fn.(type) {
-	case Sym:
-		var fn2 Value
-		if fn2, err = e.Eval(fn); err != nil {
+	case *Env:
+		if res, args, err = Next(args); err != nil {
+//line ./core/eval.gop:8
 			return
+//line ./core/eval.gop:8
 		}
-		if fn == fn2 {
-			if err = fmt.Errorf("Can't apply a self-bound symbol"); err != nil {
+					return fn.Eval(res)
+	case *Fn:
+		return fn.proc(e, args)
+	case *Table:
+		var key Value
+		if key, args, err = Next(args); err != nil {
+//line ./core/eval.gop:14
+			return
+//line ./core/eval.gop:14
+		}
+					if args != nil {
+			if err = fmt.Errorf("Excess parameters for table access: %s", args); err != nil {
+//line ./core/eval.gop:16
 				return
+//line ./core/eval.gop:16
 			}
 		}
-		return e.Apply(fn2, args)
-	case Special:
-		if args, ok := args.(*Cons); !ok {
-			if err = fmt.Errorf("%s doesn't accept non-cons argument", fn); err != nil {
-				return
-			}
-		} else {
-			return fn(e, args)
+		if res, ok := (*fn)[key]; ok {
+			return res, nil
+		}
+		if err = fmt.Errorf("No such key: %s", key); err != nil {
+//line ./core/eval.gop:21
+			return
+//line ./core/eval.gop:21
 		}
 	default:
 		if err = fmt.Errorf("Don't know how to apply a %T", fn); err != nil {
+//line ./core/eval.gop:23
 			return
+//line ./core/eval.gop:23
 		}
 	}
 	return
 }
+//line ./core/eval.gop:29
 
+//line ./core/eval.gop:28
 func (e *Env) Eval(form Value) (res Value, err error) {
 	switch form := form.(type) {
 	default:
-		if err = fmt.Errorf("Don't know how to eval a %T", form); err != nil {
-			return
+		return form, nil
+	case *Vec:
+		ary := Vec(make([]Value, len(*form)))
+		for i, elem := range *form {
+			if ary[i], err = e.Eval(elem); err != nil {
+//line ./core/eval.gop:35
+				return
+//line ./core/eval.gop:35
+			}
 		}
+		res = &ary
 	case Sym:
 		return e.Get(string(form))
 	case *Cons:
 		if res, err = e.Eval(form.car); err != nil {
+//line ./core/eval.gop:41
 			return
+//line ./core/eval.gop:41
 		}
-		return e.Apply(res, form.cdr)
+					switch fn := res.(type) {
+		case *Tagged:
+			if fn.tag == SpecialTag {
+				return e.Apply(fn.datum, form.cdr)
+			} else if fn.tag == MacroTag {
+				if res, err = e.Apply(fn.datum, form.cdr); err != nil {
+//line ./core/eval.gop:47
+					return
+//line ./core/eval.gop:47
+				}
+							return e.Eval(res)
+			} else {
+				res = fn.datum
+			}
+		}
+		args := form.cdr
+		if args, err = Map(args, e.Eval); err != nil {
+//line ./core/eval.gop:54
+			return
+//line ./core/eval.gop:54
+		}
+					return e.Apply(res, args)
 	}
 	return
 }
