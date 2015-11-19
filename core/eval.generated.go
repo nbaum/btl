@@ -67,12 +67,22 @@ func (e *Env) Eval(form Value) (res Value, err error) {
 		}
 		res = &ary
 	case Sym:
-		return e.Get(string(form))
+		if res, err = e.Get(string(form)); err != nil {
+//line ./core/eval.gop:39
+			return
+//line ./core/eval.gop:39
+		}
+					if res, ok := res.(*Tagged); ok {
+			if res.tag == SymbolMacroTag {
+				return e.Eval(res.datum)
+			}
+		}
+		return
 	case *Cons:
 		if res, err = e.Eval(form.car); err != nil {
-//line ./core/eval.gop:41
+//line ./core/eval.gop:47
 			return
-//line ./core/eval.gop:41
+//line ./core/eval.gop:47
 		}
 					switch fn := res.(type) {
 		case *Tagged:
@@ -80,9 +90,9 @@ func (e *Env) Eval(form Value) (res Value, err error) {
 				return e.Apply(fn.datum, form.cdr)
 			} else if fn.tag == MacroTag {
 				if res, err = e.Apply(fn.datum, form.cdr); err != nil {
-//line ./core/eval.gop:47
+//line ./core/eval.gop:53
 					return
-//line ./core/eval.gop:47
+//line ./core/eval.gop:53
 				}
 							return e.Eval(res)
 			} else {
@@ -91,9 +101,9 @@ func (e *Env) Eval(form Value) (res Value, err error) {
 		}
 		args := form.cdr
 		if args, err = Map(args, e.Eval); err != nil {
-//line ./core/eval.gop:54
+//line ./core/eval.gop:60
 			return
-//line ./core/eval.gop:54
+//line ./core/eval.gop:60
 		}
 					return e.Apply(res, args)
 	}

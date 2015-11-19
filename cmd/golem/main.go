@@ -17,16 +17,12 @@ func main() {
 			break
 		} else if err != nil {
 			fmt.Println(err)
-			continue
-		} else {
-			fmt.Println(">", form)
+			os.Exit(1)
 		}
-		value, err := env.Eval(form)
+		_, err = env.Eval(form)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
-		} else {
-			fmt.Println(value)
 		}
 	}
 }

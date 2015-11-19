@@ -41,3 +41,4 @@ func (t *Tagged) SetName (name string) {
 
 var SpecialTag = Intern("special")
 var MacroTag = Intern("macro")
+var SymbolMacroTag = Intern("symbol-macro")

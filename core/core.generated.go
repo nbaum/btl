@@ -4,16 +4,19 @@ package core
 
 //line ./core/core.gop:3
 func NewDefaultEnv() *Env {
-	env := NewEnv(nil)
+	env := NewBlankEnv()
 
 	// Specials
-	env.LetSpecial("assign", f_assign)
+	env.LetSpecial("=", f_assign)
 	env.LetSpecial("quote", f_quote)
 	env.LetSpecial("fn", f_fn)
 	env.LetSpecial("if", f_if)
 
+	// I/O
+	env.LetFn("prn", f_prn)
+
 	// Types
-	env.LetFn("cons?", f_consp)
+	env.LetFn("type", f_type)
 
 	// Control
 	env.LetFn("catch", f_catch)
@@ -35,8 +38,8 @@ func NewDefaultEnv() *Env {
 				// Constants
 				env.Let("nil", nil)
 				env.Let("t", Intern("t"))
-//line ./core/core.gop:37
+//line ./core/core.gop:40
 
-//line ./core/core.gop:36
+//line ./core/core.gop:39
 	return env
 }

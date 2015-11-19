@@ -3,6 +3,11 @@ package core
 import "fmt"
 
 func (c *Cons) String() string {
+	if c.car == Intern("quote") {
+		if cdr, ok := c.cdr.(*Cons); ok {
+			return fmt.Sprint("'", cdr.car)
+		}
+	}
 	s := "("
 	sep := ""
 	helper := func(v Value, b bool) error {

@@ -36,7 +36,13 @@ func (e *Env) Eval (form Value) (res Value, err error) {
     }
     res = &ary
   case Sym:
-    return e.Get(string(form))
+    res, ^err = e.Get(string(form))
+    if res, ok := res.(*Tagged); ok {
+      if res.tag == SymbolMacroTag {
+        return e.Eval(res.datum)
+      }
+    }
+    return
   case *Cons:
     res, ^err = e.Eval(form.car)
     switch fn := res.(type) {

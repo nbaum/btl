@@ -1,16 +1,19 @@
 package core
 
 func NewDefaultEnv () *Env {
-  env := NewEnv(nil)
+  env := NewBlankEnv()
 
   // Specials
-  env.LetSpecial("assign", f_assign)
+  env.LetSpecial("=", f_assign)
   env.LetSpecial("quote", f_quote)
   env.LetSpecial("fn", f_fn)
   env.LetSpecial("if", f_if)
 
+  // I/O
+  env.LetFn("prn", f_prn)
+
   // Types
-  env.LetFn("cons?", f_consp)
+  env.LetFn("type", f_type)
 
   // Control
   env.LetFn("catch", f_catch)

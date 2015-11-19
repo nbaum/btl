@@ -1,11 +1,17 @@
 package core
 
-func f_consp (e *Env, args Value) (res Value, err error) {
+import "fmt"
+
+func f_type (e *Env, args Value) (res Value, err error) {
   var vec []Value
   vec, ^err = UnpackArgs(args, 1, 1)
-  if _, ok := vec[0].(*Cons); ok {
-    return res, nil
-  } else {
-    return nil, nil
+  switch it := vec[0].(type) {
+  case *Cons:
+    res = Intern("cons")
+  case *Tagged:
+    res = it.tag
+  default:
+    err = fmt.Errorf("Unknown type for %s", e)
   }
+  return
 }

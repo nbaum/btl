@@ -1,7 +1,1 @@
-(assign caller ((fn () caller)))
-(assign list (fn args args))
-(assign mac (fn (mfn) (tag 'macro mfn)))
-(assign def (mac (fn (name args . forms) (list 'assign name (list 'fn args . forms)))))
-(assign defmac (mac (fn (name args . forms) (list 'assign name (list 'mac (list 'fn args . forms))))))
-(assign cdr (fn ((car . cdr)) cdr))
-(def cons (car cdr) (list car . cdr))
+(prn (macex1 '(mac= a b c)))

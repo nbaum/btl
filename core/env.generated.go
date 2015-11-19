@@ -24,6 +24,12 @@ func NewEnv(parent *Env) *Env {
 //line ./core/env.gop:17
 
 //line ./core/env.gop:16
+func NewBlankEnv() *Env {
+	return NewEnv(nil)
+}
+//line ./core/env.gop:21
+
+//line ./core/env.gop:20
 func (e *Env) Bind(names Value, values Value) (err error) {
 	if sym, ok := names.(Sym); ok {
 		e.Let(string(sym), values)
@@ -65,9 +71,9 @@ func (e *Env) Bind(names Value, values Value) (err error) {
 	}
 	return
 }
-//line ./core/env.gop:59
+//line ./core/env.gop:63
 
-//line ./core/env.gop:58
+//line ./core/env.gop:62
 func (e *Env) Get(name string) (Value, error) {
 	if val, ok := e.bindings[name]; ok {
 		return val, nil
@@ -77,9 +83,9 @@ func (e *Env) Get(name string) (Value, error) {
 		return nil, fmt.Errorf("Unbound: %s", name)
 	}
 }
-//line ./core/env.gop:69
+//line ./core/env.gop:73
 
-//line ./core/env.gop:68
+//line ./core/env.gop:72
 func (e *Env) Set(name string, nval Value) {
 	var helper func(e *Env) bool
 	helper = func(e *Env) bool {
@@ -96,21 +102,21 @@ func (e *Env) Set(name string, nval Value) {
 		e.Let(name, nval)
 	}
 }
-//line ./core/env.gop:86
-
-//line ./core/env.gop:85
-func (e *Env) LetSpecial(name string, fn func(*Env, Value) (Value, error)) {
-	e.bindings[name] = Special(NewFn(name, fn))
-}
 //line ./core/env.gop:90
 
 //line ./core/env.gop:89
-func (e *Env) LetFn(name string, fn func(*Env, Value) (Value, error)) {
-	e.bindings[name] = NewFn(name, fn)
+func (e *Env) LetSpecial(name string, fn func(*Env, Value) (Value, error)) {
+	e.bindings[name] = Special(NewFn(name, fn))
 }
 //line ./core/env.gop:94
 
 //line ./core/env.gop:93
+func (e *Env) LetFn(name string, fn func(*Env, Value) (Value, error)) {
+	e.bindings[name] = NewFn(name, fn)
+}
+//line ./core/env.gop:98
+
+//line ./core/env.gop:97
 func (e *Env) Let(name string, value Value) {
 	if value, ok := value.(Named); ok {
 		if value.Name() == "" {
@@ -119,9 +125,9 @@ func (e *Env) Let(name string, value Value) {
 	}
 	e.bindings[name] = value
 }
-//line ./core/env.gop:103
+//line ./core/env.gop:107
 
-//line ./core/env.gop:102
+//line ./core/env.gop:106
 func (e *Env) String() string {
 	return "#<env>"
 }

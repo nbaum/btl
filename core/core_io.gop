@@ -1,0 +1,10 @@
+package core
+
+import "fmt"
+
+func f_prn (env *Env, args Value) (res Value, err error) {
+  var vec []Value
+  vec, ^err = UnpackArgs(args, 1, 1)
+  _, ^err = fmt.Println(vec[0])
+  return
+}
