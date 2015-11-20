@@ -2,7 +2,7 @@ package core
 
 import "fmt"
 
-func f_fn (env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("fn", func (env *Env, args Value) (res Value, err error) {
   var forms Value
   args, forms, ^err = Next(args)
   res = NewFn("", func (fenv *Env, fargs Value) (res Value, err error) {
@@ -16,9 +16,9 @@ func f_fn (env *Env, args Value) (res Value, err error) {
     return
   })
   return
-}
+})
 
-func f_assign (env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("=", func (env *Env, args Value) (res Value, err error) {
   vec := ToArray(args)
   if len(vec) % 2 == 1 {
     ^err = fmt.Errorf("assign expects even number of arguments")
@@ -36,9 +36,9 @@ func f_assign (env *Env, args Value) (res Value, err error) {
     env.Set(string(vec[i].(Sym)), res)
   }
   return
-}
+})
 
-func f_if (env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("if", func (env *Env, args Value) (res Value, err error) {
   var cond, then Value
   for args != nil {
     cond, args, ^err = Next(args)
@@ -55,12 +55,12 @@ func f_if (env *Env, args Value) (res Value, err error) {
     }
   }
   return
-}
+})
 
-func f_quote (env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("quote", func (env *Env, args Value) (res Value, err error) {
   res, args, ^err = Next(args)
   if args != nil {
     ^err = fmt.Errorf("too many arguments to quote")
   }
   return
-}
+})

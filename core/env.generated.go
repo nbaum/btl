@@ -105,29 +105,32 @@ func (e *Env) Set(name string, nval Value) {
 //line ./core/env.gop:90
 
 //line ./core/env.gop:89
-func (e *Env) LetSpecial(name string, fn func(*Env, Value) (Value, error)) {
+func (e *Env) LetSpecial(name string, fn func(*Env, Value) (Value, error)) bool {
 	e.bindings[name] = Special(NewFn(name, fn))
+	return true
 }
+//line ./core/env.gop:95
+
 //line ./core/env.gop:94
-
-//line ./core/env.gop:93
-func (e *Env) LetFn(name string, fn func(*Env, Value) (Value, error)) {
+func (e *Env) LetFn(name string, fn func(*Env, Value) (Value, error)) bool {
 	e.bindings[name] = NewFn(name, fn)
+	return true
 }
-//line ./core/env.gop:98
+//line ./core/env.gop:100
 
-//line ./core/env.gop:97
-func (e *Env) Let(name string, value Value) {
+//line ./core/env.gop:99
+func (e *Env) Let(name string, value Value) bool {
 	if value, ok := value.(Named); ok {
 		if value.Name() == "" {
 			value.SetName(name)
 		}
 	}
 	e.bindings[name] = value
+	return true
 }
-//line ./core/env.gop:107
+//line ./core/env.gop:110
 
-//line ./core/env.gop:106
+//line ./core/env.gop:109
 func (e *Env) String() string {
 	return "#<env>"
 }

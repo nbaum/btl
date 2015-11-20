@@ -7,6 +7,8 @@ func (e *Env) Apply (fn Value, args Value) (res Value, err error) {
   case *Env:
     res, args, ^err = Next(args)
     return fn.Eval(res)
+  case *MultiFn:
+    return fn.Apply(e, args)
   case *Fn:
     return fn.proc(e, args)
   case *Table:

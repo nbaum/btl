@@ -7,7 +7,7 @@ import "fmt"
 //line ./core/core_specials.gop:6
 
 //line ./core/core_specials.gop:5
-func f_fn(env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("fn", func(env *Env, args Value) (res Value, err error) {
 	var forms Value
 	if args, forms, err = Next(args); err != nil {
 //line ./core/core_specials.gop:7
@@ -40,11 +40,11 @@ func f_fn(env *Env, args Value) (res Value, err error) {
 		return
 	})
 	return
-}
+})
 //line ./core/core_specials.gop:22
 
 //line ./core/core_specials.gop:21
-func f_assign(env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("=", func(env *Env, args Value) (res Value, err error) {
 	vec := ToArray(args)
 	if len(vec)%2 == 1 {
 		if err = fmt.Errorf("assign expects even number of arguments"); err != nil {
@@ -74,11 +74,11 @@ func f_assign(env *Env, args Value) (res Value, err error) {
 		env.Set(string(vec[i].(Sym)), res)
 	}
 	return
-}
+})
 //line ./core/core_specials.gop:42
 
 //line ./core/core_specials.gop:41
-func f_if(env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("if", func(env *Env, args Value) (res Value, err error) {
 	var cond, then Value
 	for args != nil {
 		if cond, args, err = Next(args); err != nil {
@@ -115,11 +115,11 @@ func f_if(env *Env, args Value) (res Value, err error) {
 		}
 	}
 	return
-}
+})
 //line ./core/core_specials.gop:61
 
 //line ./core/core_specials.gop:60
-func f_quote(env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetSpecial("quote", func(env *Env, args Value) (res Value, err error) {
 	if res, args, err = Next(args); err != nil {
 //line ./core/core_specials.gop:61
 		return
@@ -133,4 +133,4 @@ func f_quote(env *Env, args Value) (res Value, err error) {
 		}
 	}
 	return
-}
+})

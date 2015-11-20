@@ -7,7 +7,7 @@ import "fmt"
 //line ./core/core_io.gop:6
 
 //line ./core/core_io.gop:5
-func f_prn(env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetFn("prn", func(env *Env, args Value) (res Value, err error) {
 	var vec []Value
 	if vec, err = UnpackArgs(args, 1, 1); err != nil {
 //line ./core/core_io.gop:7
@@ -20,4 +20,4 @@ func f_prn(env *Env, args Value) (res Value, err error) {
 //line ./core/core_io.gop:8
 	}
 				return
-}
+})

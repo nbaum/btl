@@ -9,7 +9,7 @@ type Result struct {
   ko error
 }
 
-func f_catch (env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetFn("point", func (env *Env, args Value) (res Value, err error) {
   var vec []Value
   vec, ^err = UnpackArgs(args, 1, 1)
   channel := make(chan Result)
@@ -26,14 +26,14 @@ func f_catch (env *Env, args Value) (res Value, err error) {
   }()
   result := <-channel
   return result.ok, result.ko
-}
+})
 
-func f_finally (env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetFn("protect", func (env *Env, args Value) (res Value, err error) {
   var vec []Value
   vec, ^err = UnpackArgs(args, 2, 2)
   defer func () {
-    r := recover()
+    r := AsValue(recover())
     _, ^err = env.Apply(vec[1], NewCons(r, nil))
   }()
   return env.Apply(vec[0], nil)
-}
+})

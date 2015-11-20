@@ -11,7 +11,11 @@ type Tagged struct {
 func Tag (tag, datum Value) *Tagged {
   switch datum := datum.(type) {
   case *Tagged:
-    return &Tagged{tag, datum.datum}
+    if datum.tag == tag {
+      return datum
+    } else {
+      return &Tagged{tag, datum}
+    }
   default:
     return &Tagged{tag, datum}
   }

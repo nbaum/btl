@@ -16,7 +16,7 @@ type Result struct {
 //line ./core/core_control.gop:13
 
 //line ./core/core_control.gop:12
-func f_catch(env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetFn("point", func(env *Env, args Value) (res Value, err error) {
 	var vec []Value
 	if vec, err = UnpackArgs(args, 1, 1); err != nil {
 //line ./core/core_control.gop:14
@@ -41,11 +41,11 @@ func f_catch(env *Env, args Value) (res Value, err error) {
 	}()
 	result := <-channel
 	return result.ok, result.ko
-}
+})
 //line ./core/core_control.gop:32
 
 //line ./core/core_control.gop:31
-func f_finally(env *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetFn("protect", func(env *Env, args Value) (res Value, err error) {
 	var vec []Value
 	if vec, err = UnpackArgs(args, 2, 2); err != nil {
 //line ./core/core_control.gop:33
@@ -53,7 +53,7 @@ func f_finally(env *Env, args Value) (res Value, err error) {
 //line ./core/core_control.gop:33
 	}
 					defer func() {
-		r := recover()
+		r := AsValue(recover())
 		if _, err = env.Apply(vec[1], NewCons(r, nil)); err != nil {
 //line ./core/core_control.gop:36
 			return
@@ -61,4 +61,4 @@ func f_finally(env *Env, args Value) (res Value, err error) {
 		}
 	}()
 	return env.Apply(vec[0], nil)
-}
+})

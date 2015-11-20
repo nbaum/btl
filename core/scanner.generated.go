@@ -257,7 +257,7 @@ func (s *Scanner) ReadForm() (val Value, err error) {
 				return
 //line ./core/scanner.gop:146
 			}
-						return NewCons(Intern("fn"), NewCons(List(Intern("_")), val)), nil
+						return NewCons(Intern("fn"), NewCons(List(Intern("_")), NewCons(val, nil))), nil
 		}
 	case '`':
 		if val, err = s.ReadForm(); err != nil {

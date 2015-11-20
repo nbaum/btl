@@ -144,7 +144,7 @@ func (s *Scanner) ReadForm () (val Value, err error) {
       return List(Intern("fn"), List(Intern("_"))), nil
     } else {
       val, ^err = s.readList(']')
-      return NewCons(Intern("fn"), NewCons(List(Intern("_")), val)), nil
+      return NewCons(Intern("fn"), NewCons(List(Intern("_")), NewCons(val, nil))), nil
     }
   case '`':
     val, ^err = s.ReadForm()

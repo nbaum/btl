@@ -1,17 +1,11 @@
 package core
 
-import "fmt"
-
-func f_type (e *Env, args Value) (res Value, err error) {
+var _ = defaultEnv.LetFn("type", func (e *Env, args Value) (res Value, err error) {
   var vec []Value
   vec, ^err = UnpackArgs(args, 1, 1)
-  switch it := vec[0].(type) {
-  case *Cons:
-    res = Intern("cons")
-  case *Tagged:
-    res = it.tag
-  default:
-    err = fmt.Errorf("Unknown type for %s", e)
+  if vec[0] == nil {
+    return Intern("nil"), nil
+  } else {
+    return vec[0].Type(), nil
   }
-  return
-}
+})
