@@ -1,9 +1,0 @@
-package core
-
-import "fmt"
-
-type Float float64
-
-func (f Float) String () string {
-  return fmt.Sprintf("%f", f)
-}

@@ -1,0 +1,47 @@
+package golem
+
+import (
+	"sync"
+)
+
+type Result struct {
+	val Value
+	err error
+}
+
+type Thread struct {
+	co   *sync.Cond
+	res  Result
+	dead bool
+}
+
+func NewThread(fn func(Value) (Value, error)) *Thread {
+	t := &Thread{sync.NewCond(new(sync.Mutex)), Result{nil, nil}, false}
+	go func() {
+		t.Finish(fn(t))
+	}()
+	return t
+}
+
+func (t *Thread) Finish(val Value, err error) {
+	t.co.L.Lock()
+	defer t.co.L.Unlock()
+	t.res = Result{val, err}
+	t.dead = true
+	t.co.Broadcast()
+}
+
+func (t *Thread) Wait() (Value, error) {
+	t.co.L.Lock()
+	defer t.co.L.Unlock()
+	t.co.Wait()
+	return t.res.val, t.res.err
+}
+
+func (*Thread) Type() Value {
+	return Intern("thread")
+}
+
+func (*Thread) String() string {
+	return "#<thread>"
+}

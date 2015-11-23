@@ -1,0 +1,3 @@
+package golem
+
+type Vec []Value

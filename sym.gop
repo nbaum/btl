@@ -1,0 +1,37 @@
+package golem
+
+type Sym string
+
+var symtab = make(map[string]Sym)
+
+func Intern(name string) Sym {
+	if sym, ok := symtab[name]; ok {
+		return sym
+	} else {
+		sym := Sym(name)
+		symtab[name] = sym
+		return sym
+	}
+}
+
+func (s Sym) Eval(e *Env) (Value, error) {
+	return e.Get(string(s))
+}
+
+func (s Sym) String() string {
+	o := ""
+	if s == "." {
+		return "\\."
+	}
+	for _, c := range string(s) {
+		if !isAtomRune(c) {
+			o += "\\"
+		}
+		o += string(c)
+	}
+	return o
+}
+
+func (_ Sym) Type() Value {
+	return Intern("sym")
+}

@@ -1,0 +1,38 @@
+package golem
+
+import (
+	"fmt"
+)
+
+type Fn struct {
+	proc func(*Env, Value) (Value, error)
+	name string
+}
+
+func NewFn(proc func(*Env, Value) (Value, error)) *Fn {
+	return &Fn{proc, ""}
+}
+
+func (f *Fn) Apply(e *Env, args Value) (Value, error) {
+	return f.proc(e, args)
+}
+
+func (f *Fn) Name() string {
+	return f.name
+}
+
+func (f *Fn) SetName(name string) {
+	f.name = name
+}
+
+func (f *Fn) String() string {
+	if f.name == "" {
+		return fmt.Sprintf("#<proc %p>", f)
+	} else {
+		return fmt.Sprintf("#<proc %s>", f.name)
+	}
+}
+
+func (_ *Fn) Type() Value {
+	return Intern("fn")
+}

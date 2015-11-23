@@ -1,0 +1,34 @@
+package golem
+
+type Value interface {
+}
+
+type Evaluable interface {
+	Eval(*Env) (Value, error)
+}
+
+type Applicator interface {
+	Apply(*Env, Value) (Value, error)
+}
+
+type Named interface {
+	Name() string
+	SetName(string)
+}
+
+type Typed interface {
+	Type() Value
+}
+
+type Disper interface {
+	Disp(*Env) error
+}
+
+type Collection interface {
+	Set(Value, Value) error
+}
+
+type Sliceable interface {
+	SetCar(Value) error
+	SetCdr(Value) error
+}

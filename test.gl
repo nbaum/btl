@@ -1,8 +1,0 @@
-(= + (multifn [+ 0 _] '(t) + t))
-(= - (multifn [- 0 _] '(t) - t))
-(= / (multifn [/ 1 _] '(t) / t))
-(= * (multifn [* 1 _] '(t) / t))
-
-(= a 1321)
-(= b 432432)
-(prn (if (< a b) a b))

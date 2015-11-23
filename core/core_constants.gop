@@ -1,3 +1,0 @@
-package core
-
-var _ = defaultEnv.Let("t", Intern("t"))

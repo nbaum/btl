@@ -1,0 +1,137 @@
+package golem
+
+import (
+	"fmt"
+)
+
+type Cons struct {
+	car, cdr Value
+}
+
+func (c *Cons) Clone() *Cons {
+	switch cdr := c.cdr.(type) {
+	case *Cons:
+		return &Cons{c.car, cdr.Clone()}
+	default:
+		return &Cons{c.car, nil}
+	}
+}
+
+func (c *Cons) Apply(e *Env, args Value) (val Value, err error) {
+	i, args := Next(args)
+	if i, ok := i.(Int); ok {
+		for i > 0 {
+			switch cdr := c.cdr.(type) {
+			case *Cons:
+				i -= 1
+				c = cdr
+			case nil:
+				return nil, fmt.Errorf("index out of bounds")
+			default:
+				if i == 1 {
+					return cdr, nil
+				} else {
+					return nil, fmt.Errorf("index out of bounds")
+				}
+			}
+		}
+		return c.car, nil
+	}
+	return nil, fmt.Errorf("cons indices are ints")
+}
+
+func (c *Cons) SetCar(v Value) error {
+	c.car = v
+	return nil
+}
+
+func (c *Cons) SetCdr(v Value) error {
+	c.cdr = v
+	return nil
+}
+
+func (c *Cons) Set(key, value Value) error {
+	if i, ok := key.(Int); ok {
+		for i > 0 {
+			switch cdr := c.cdr.(type) {
+			case *Cons:
+				i -= 1
+				c = cdr
+			case nil:
+				return fmt.Errorf("index out of bounds")
+			default:
+				if i == 1 {
+					c.cdr = value
+				} else {
+					return fmt.Errorf("index out of bounds")
+				}
+			}
+		}
+		c.car = value
+		return nil
+	}
+	return fmt.Errorf("cons indices are ints")
+}
+
+func (c *Cons) Eval(e *Env) (val Value, err error) {
+	val, ^err = Eval(e, c.car)
+	args := c.cdr
+	if tag, ok := val.(*Tagged); ok {
+		if tag.tag == Intern("special") {
+			val = tag.rep
+			goto call
+		} else if tag.tag == Intern("macro") {
+			val, ^err = Apply(e, tag.rep, args)
+			return Eval(e, val)
+		}
+	}
+	args, ^err = Map(args, func(v Value) (Value, error) { return Eval(e, v) })
+call:
+	return Apply(e, val, args)
+}
+
+func (c *Cons) String() string {
+	if cdr, ok := c.cdr.(*Cons); ok && cdr.cdr == nil {
+		if c.car == Intern("quote") {
+			return fmt.Sprintf("'%s", cdr.car)
+		} else if c.car == Intern("quasiquote") {
+			return fmt.Sprintf("`%s", cdr.car)
+		} else if c.car == Intern("unquote") {
+			return fmt.Sprintf(",%s", cdr.car)
+		} else if c.car == Intern("unquote-splicing") {
+			return fmt.Sprintf(",@%s", cdr.car)
+		}
+	}
+	s := "("
+	s += fmt.Sprint(c.car)
+	n := c.cdr
+again:
+	switch nn := n.(type) {
+	case *Cons:
+		s += " " + fmt.Sprint(nn.car)
+		n = nn.cdr
+		goto again
+	case nil:
+	default:
+		s += " . " + fmt.Sprint(nn)
+	}
+	s += ")"
+	return s
+}
+
+func (_ *Cons) Type() Value {
+	return Intern("cons")
+}
+
+func (c *Cons) EndOfList() *Cons {
+	for {
+		switch cdr := c.cdr.(type) {
+		case nil:
+			return c
+		case *Cons:
+			c = cdr
+		default:
+			return c
+		}
+	}
+}

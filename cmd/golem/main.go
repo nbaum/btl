@@ -3,26 +3,31 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/nbaum/golem/core"
-	"io"
+	g "github.com/nbaum/golem"
+	// "io"
 	"os"
 )
 
 func main() {
-	s := core.NewScanner(bufio.NewReader(os.Stdin))
-	env := core.NewEnv(core.NewDefaultEnv())
+	env := g.NewEnv(nil).Arclike()
+	scanner := g.NewScanner(bufio.NewReader(os.Stdin))
 	for {
-		form, err := s.ReadForm()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_, err = env.Eval(form)
+		form, err := scanner.ReadForm()
 		if err != nil {
 			fmt.Println(err)
-			os.Exit(1)
+			break
+		} else {
+			fmt.Println(">", form)
+			val, err := g.DeferToErr(func()(g.Value, error) {
+				return g.Eval(env, form)
+			})
+			if err != nil {
+				fmt.Println(err)
+				break
+			} else {
+				fmt.Println(val)
+				_ = val
+			}
 		}
 	}
 }

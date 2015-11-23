@@ -1,0 +1,7 @@
+package golem
+
+type Int int64
+
+func (_ Int) Type() Value {
+	return Intern("int")
+}

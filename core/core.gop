@@ -1,7 +1,0 @@
-package core
-
-var defaultEnv = NewEnv(nil)
-
-func NewDefaultEnv () *Env {
-  return NewEnv(defaultEnv)
-}

@@ -1,7 +1,0 @@
-package core
-
-type Str string
-
-func (s Str) String () string {
-  return "\"" + string(s) + "\""
-}

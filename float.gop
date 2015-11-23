@@ -1,0 +1,7 @@
+package golem
+
+type Float float64
+
+func (_ Float) Type() Value {
+	return Intern("num")
+}

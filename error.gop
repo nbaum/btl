@@ -1,0 +1,17 @@
+package golem
+
+import (
+	"fmt"
+)
+
+type Error struct {
+	err error
+}
+
+func (e *Error) Type() Value {
+	return Intern("error")
+}
+
+func (e *Error) String() string {
+	return fmt.Sprintf("#<error %q>", e.err.Error())
+}

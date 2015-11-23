@@ -1,0 +1,32 @@
+package golem
+
+import (
+	"fmt"
+	"unicode/utf8"
+)
+
+type Str string
+
+func (_ Str) Type() Value {
+	return Intern("string")
+}
+
+func (s Str) String() string {
+	return fmt.Sprintf("%q", string(s))
+}
+
+func (s Str) Disp(*Env) error {
+	fmt.Print(string(s))
+	return nil
+}
+
+func (s Str) Apply(e *Env, args Value) (val Value, err error) {
+	i, args := Next(args)
+	if i, ok := i.(Int); ok {
+		if i < 0 || int(i) > utf8.RuneCountInString(string(s))-1 {
+			return nil, fmt.Errorf("index out of bounds")
+		}
+		return Rune([]rune(string(s))[i]), nil
+	}
+	return nil, fmt.Errorf("string indices are ints")
+}

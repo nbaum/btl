@@ -1,0 +1,40 @@
+package golem
+
+import (
+	"fmt"
+)
+
+type Tagged struct {
+	tag, rep Value
+}
+
+func Tag(name string, rep Value) *Tagged {
+	tag := Intern(name)
+	if rep, ok := rep.(*Tagged); ok {
+		if rep.tag == tag {
+			return rep
+		}
+	}
+	return &Tagged{tag, rep}
+}
+
+func (t *Tagged) Type() Value {
+	return t.tag
+}
+
+func (t *Tagged) Name() (s string) {
+	if rep, ok := t.rep.(*Tagged); ok {
+		s = rep.Name()
+	}
+	return
+}
+
+func (t *Tagged) SetName(name string) {
+	if rep, ok := t.rep.(Named); ok {
+		rep.SetName(name)
+	}
+}
+
+func (t *Tagged) String() string {
+	return fmt.Sprintf("#(%s %s)", t.tag, t.rep)
+}

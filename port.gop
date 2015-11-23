@@ -1,0 +1,66 @@
+package golem
+
+import (
+	"bufio"
+	"io"
+	"net"
+)
+
+type RuneWriter interface {
+	io.Writer
+	io.ByteWriter
+	WriteRune(rune) (int, error)
+}
+
+type RuneReader interface {
+	io.RuneScanner
+	io.ByteReader
+}
+
+type InPort struct {
+	RuneReader
+}
+
+func NewInPort(s RuneReader) *InPort {
+	return &InPort{s}
+}
+
+func (p *InPort) Type() Value {
+	return Intern("inport")
+}
+
+func (p *InPort) String() string {
+	return "#<inport>"
+}
+
+type OutPort struct {
+	RuneWriter
+}
+
+func NewOutPort(s RuneWriter) *OutPort {
+	return &OutPort{s}
+}
+
+func (p *OutPort) Type() Value {
+	return Intern("outport")
+}
+func (p *OutPort) String() string {
+	return "#<outport>"
+}
+
+type NetPort struct {
+	RuneReader
+	RuneWriter
+	net.Conn
+}
+
+func NewNetPort(s net.Conn) *NetPort {
+	return &NetPort{bufio.NewReader(s), bufio.NewWriter(s), s}
+}
+
+func (p *NetPort) Type() Value {
+	return Intern("netport")
+}
+func (p *NetPort) String() string {
+	return "#<netport>"
+}

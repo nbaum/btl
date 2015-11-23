@@ -1,0 +1,91 @@
+package golem
+
+import (
+	"fmt"
+)
+
+func Apply(env *Env, fn Value, args Value) (val Value, err error) {
+	switch fn := fn.(type) {
+	case Applicator:
+		return fn.Apply(env, args)
+	default:
+		return nil, fmt.Errorf("not applicator: %s", fn)
+	}
+}
+
+func Eval(env *Env, form Value) (val Value, err error) {
+	switch form := form.(type) {
+	case Evaluable:
+		return form.Eval(env)
+	default:
+		return form, nil
+	}
+}
+
+func List(val ...Value) *Cons {
+	if len(val) == 1 {
+		return &Cons{val[0], nil}
+	} else {
+		return &Cons{val[0], List(val[1:]...)}
+	}
+}
+
+func Map(l Value, f func(Value) (Value, error)) (val Value, err error) {
+	switch l := l.(type) {
+	case *Cons:
+		var rest Value
+		val, ^err = f(l.car)
+		rest, ^err = Map(l.cdr, f)
+		return &Cons{val, rest}, nil
+	case nil:
+		return nil, nil
+	default:
+		return f(l)
+	}
+}
+
+func Each(l Value, f func(Value) (Value, error)) (val Value, err error) {
+	switch l := l.(type) {
+	case *Cons:
+		val, ^err = f(l.car)
+		if l.cdr != nil {
+			val, err = Each(l.cdr, f)
+		}
+	case nil:
+	default:
+		val, err = f(l)
+	}
+	return
+}
+
+func Next(l Value) (Value, Value) {
+	switch l := l.(type) {
+	case *Cons:
+		return l.car, l.cdr
+	default:
+		return l, nil
+	}
+}
+
+func Nth(l Value, i int) (Value, error) {
+	j := i
+	k := l
+	for {
+		if j == 0 {
+			switch k := k.(type) {
+			case *Cons:
+				return k.car, nil
+			default:
+				return k, nil
+			}
+		} else {
+			switch kk := k.(type) {
+			case *Cons:
+				j = j - 1
+				k = kk.cdr
+			default:
+				return nil, fmt.Errorf("index out of bounds: %d in %v", i, l)
+			}
+		}
+	}
+}

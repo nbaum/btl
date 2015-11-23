@@ -1,0 +1,17 @@
+package golem
+
+import (
+	"net"
+)
+
+type Listener struct {
+	ln net.Listener
+}
+
+func (*Listener) Type() Value {
+	return Intern("listener")
+}
+
+func (*Listener) String() string {
+	return "#<listener>"
+}

@@ -1,0 +1,64 @@
+package golem
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+)
+
+type Rune rune
+
+func (_ Rune) Type() Value {
+	return Intern("char")
+}
+
+func (r Rune) String() string {
+	if unicode.IsPrint(rune(r)) {
+		return fmt.Sprintf("#\\%c", rune(r))
+	} else {
+		return fmt.Sprintf("#\\u%04x", rune(r))
+	}
+}
+
+func (r Rune) Disp(*Env) error {
+	fmt.Printf("%c", rune(r))
+	return nil
+}
+
+func ContainsOnly(s, chars string) bool {
+	for _, c := range s {
+		if !strings.ContainsRune(chars, c) {
+			return false
+		}
+	}
+	return true
+}
+
+var runemap = map[string]rune{
+	"null":    '\000',
+	"tab":     '\t',
+	"newline": '\n',
+}
+
+func RuneFromName(name string) (val Value, err error) {
+	var i int64
+	if name == "" {
+		return nil, fmt.Errorf("zero-length rune")
+	} else if utf8.RuneCountInString(name) == 1 {
+		r, _ := utf8.DecodeRuneInString(name)
+		return Rune(r), nil
+	} else if name[0] == 'u' || name[0] == 'U' {
+		if ContainsOnly(name[1:], "0123456789ABCDEFabcdef") {
+			i, ^err = strconv.ParseInt(name[1:], 16, 32)
+			return Rune(i), nil
+		}
+	} else if ContainsOnly(name, "0123456789") {
+		i, ^err = strconv.ParseInt(name, 8, 32)
+		return Rune(i), nil
+	} else if r, ok := runemap[name]; ok {
+		return Rune(r), nil
+	}
+	return nil, fmt.Errorf("bad rune: %s", name)
+}

@@ -1,5 +1,0 @@
-package core
-
-var _ = defaultEnv.LetFn("table", func (env *Env, args Value) (res Value, err error) {
-  return NewTable(), nil
-})

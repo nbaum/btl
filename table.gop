@@ -1,0 +1,22 @@
+package golem
+
+type Table map[Value]Value
+
+func NewTable() *Table {
+	temp := Table(make(map[Value]Value))
+	return &temp
+}
+
+func (*Table) Type() Value {
+	return Intern("table")
+}
+
+func (t *Table) Set(key, val Value) error {
+	(*t)[key] = val
+	return nil
+}
+
+func (t *Table) Apply(e *Env, args Value) (Value, error) {
+	key, args := Next(args)
+	return (*t)[key], nil
+}
