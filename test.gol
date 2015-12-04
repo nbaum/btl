@@ -1,0 +1,30 @@
+;; Comments
+
+;; Integers
+1
+23
+42
+1e9
+
+;; Floats
+1.0
+1.0e9
+
+;; Lists
+'(1 2 3 4)
+'(1 2 3 4 . 5)
+
+;; Vectors
+'[1 2 3 4]
+
+;; Tabs
+'{a 1 b 2 c 3}
+
+;; Types
+(type 1)
+(type 1.0)
+(type '(1 2 3 4))
+(type '())
+(type 'foo)
+(type '[1 2 3 4])
+(type '{1 2 3 4})
