@@ -33,11 +33,11 @@
 
 (abs -1)
 (floor -1.5)
-(truncate -1.5)
-(ceiling -1.5)
+(trunc -1.5)
+(ceil -1.5)
 
-(number->string 42)
-(string->number "42")
+(num->str 42)
+(str->num "42")
 
 cons? ; (comparable and ordered)
   cons
@@ -55,7 +55,7 @@ char? ; (comparable and ordered)
   int->char
 
 iterable?
-  length
+  len
   nth
   nth=
   slice
@@ -68,8 +68,8 @@ string? ; (comparable and ordered and iterable)
 vector? ; (comparable and ordered and iterable)
   make-vector
 
-bytevector? ; (comparable and ordered and iterable)
-  make-bytevector
+bvec? ; (comparable and ordered and iterable)
+  make-bvec
 
 applicable?
   catch
@@ -79,7 +79,7 @@ tagged?
   tag
   rep
 
-environment?
+env?
   env
 
 port?

@@ -1,69 +1,49 @@
-#define try ... {@...
+#define try ... {
+  @...
   if err != nil {
     panic(err)
   }
 }
 
+#define try_ok ... {
+  @...
+  if !ok {
+    panic("bad-type")
+  }
+}
+
 #define arg var num type {
-  @var, ok := args[@num].(@type)
-  if ok != nil {
-    panic("bad-type")
-  }
-}
-
-#define isa val typ { _, ok := @val.(@typ); ok }
-#define it_isa val typ { it, ok := @val.(@typ); ok }
-
-#define is_a var typ { _, ok := @var.(@typ); ok }
-#define it_is_a var val typ { @var, ok := @val.(@typ); ok }
-
-#define must_be_a val typ {
-  _, ok := @val.(@typ)
+  arg@num, ok := args[@num].(@type)
+  @var := arg@num
   if !ok {
     panic("bad-type")
   }
 }
 
-#define it_must_be_a var val typ {
-  @var, ok := @val.(@typ)
-  if !ok {
-    panic("bad-type")
-  }
+#define is_a var typ {
+  _, ok := @var.(@typ); ok
+}
+
+#define it_is_a var val typ {
+  @var, ok := @val.(@typ); ok
 }
 
 #define func name min max body {
 func init() {
   Core.Function("@name", func(env *Env, args[]Value) (result Value) {
     CheckArgs("@name", @min, @max, args)
-    @body})
+    @body
+  })
 }
 }
 
-#define binary op {
-  @func "@op" 1 -1 {
-    #define icase atype btype aconv bconv { case @btype: result = @atype(@aconv(a) @op @bconv(b)) }
-    result = args[0]
-    for _, arg := range args[1:] {
-      switch a := result.(type) {
-      case Int:
-        switch b := arg.(type) {
-        @icase(Int, Int, , , )
-        @icase(Float, Float, Float, )
-        default:
-          panic("bad-type")
-        }
-      case Float:
-        switch b := args[1].(type) {
-        @icase(Float, Int, , Float)
-        @icase(Float, Float, , )
-        default:
-          panic("bad-type")
-        }
-      default:
-        panic("bad-type")
-      }
+#define type_predicate name type {
+  @func @name 1 1 {
+    if @is_a(args[0], @type) {
+      return T
+    } else {
+      return Nil
     }
-    return
   }
 }
 
@@ -93,17 +73,5 @@ func init() {
       result = arg
     }
     return
-  }
-}
-
-#define mathfunc name Name {
-  @func @name 1 1 {
-    if @it_isa(args[0], Int) {
-      return Int(math.@Name(float64(it)))
-    }
-    if @it_isa(args[0], Float) {
-      return Float(math.@Name(float64(it)))
-    }
-    panic("bad-type")
   }
 }

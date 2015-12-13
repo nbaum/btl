@@ -1,0 +1,10 @@
+package golem
+
+#import "macros.gpp"
+
+@compare <
+@compare >
+@compare <=
+@compare >=
+@compare ==
+@compare !=

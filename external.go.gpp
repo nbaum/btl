@@ -5,96 +5,48 @@ import (
   "time"
 )
 
+#import "macros.gpp"
 
-func init() {
-  Core.Function("file-exists?", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("file-exists?", 1, 1, args)
-    path, ok := args[0].(Str)
-  if !ok {
-    panic("bad-type")
-  }
-
-  if stat, err := os.Stat(string(path)); err != nil {
-    if !stat.IsDir() {
-      return T
-    }
-  }
-  return Nil
-})
-}
-
-func init() {
-  Core.Function("dir-exists?", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("dir-exists?", 1, 1, args)
-    path, ok := args[0].(Str)
-  if !ok {
-    panic("bad-type")
-  }
-
-  if stat, err := os.Stat(string(path)); err != nil {
-    if stat.IsDir() {
-      return T
-    }
-  }
-  return Nil
-})
-}
-
-func init() {
-  Core.Function("delete-file", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("delete-file", 1, 1, args)
-    path, ok := args[0].(Str)
-  if !ok {
-    panic("bad-type")
-  }
-
-  err := os.Remove(string(path))
-  if err != nil {
-    panic(err)
-  }
+@func "file-exists?" 1 1 {
+  @arg path 0 Str
+  @try _  , err := os.Stat(string(path))
   return T
-})
 }
 
-func init() {
-  Core.Function("args", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("args", 0, 0, args)
-    res := []Value{}
+@func "dir-exists?" 1 1 {
+  @arg path 0 Str
+  @try stat, err := os.Stat(string(path))
+  if stat.IsDir() {
+    return T
+  }
+  return Nil
+}
+
+@func "delete-file" 1 1 {
+  @arg path 0 Str
+  @try err := os.Remove(string(path))
+  return T
+}
+
+@func "args" 0 0 {
+  res := []Value{}
   for arg := range os.Args {
     res = append(args, Str(arg))
   }
   return Vec(res)
-})
 }
 
-func init() {
-  Core.Function("exit", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("exit", 1, 1, args)
-    status, ok := args[0].(Int)
-  if !ok {
-    panic("bad-type")
-  }
-
+@func "exit" 1 1 {
+  @arg status 0 Int
   os.Exit(int(status))
   return Nil
-})
 }
 
-func init() {
-  Core.Function("getenv", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("getenv", 1, 1, args)
-    key, ok := args[0].(Str)
-  if !ok {
-    panic("bad-type")
-  }
-
+@func "getenv" 1 1 {
+  @arg key 0 Str
   return Str(os.Getenv(string(key)))
-})
 }
 
-func init() {
-  Core.Function("time", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("time", 0, 0, args)
-    return Int(time.Now().UnixNano())
-})
+@func "time" 0 0 {
+  return Int(time.Now().UnixNano())
 }

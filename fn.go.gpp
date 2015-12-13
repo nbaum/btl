@@ -24,31 +24,27 @@ func (f *Fn) Type() Value {
 }
 
 func (f *Fn) Apply(e *Env, v Value) Value {
-  args := ToVec(Map(v, func(i int, arg Value) Value{
-    return Eval(e, arg, Variables)
-  }))
+  args := ToVec(v)
   return f.proc(e, args)
 }
 
-func init() {
-  Core.Function("environment?", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("environment?", 1, 1, args)
-    if _, ok := args[0].(*Env); ok  {
+#import "macros.gpp"
+
+@func "applicable?" 1 1 {
+  if @is_a(args[0], Applicator) {
     return T
   } else {
     return Nil
   }
-})
 }
 
-func init() {
-  Core.Function("env", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("env", 1, 1, args)
-    if args[0] == Nil {
-    return NewEnv(nil)
-  } else if it, ok := args[0].(*Env); ok  {
-    return NewEnv(it)
-  }
-  panic("bad-type")
-})
+@func "catch" 1 1 {
+  @arg fn 0 Applicator
+  _ = fn
+  return Nil
+}
+
+@func "unwind-protect" 2 2 {
+  defer Apply(env, args[1], Nil)
+  return Apply(env, args[0], Nil)
 }

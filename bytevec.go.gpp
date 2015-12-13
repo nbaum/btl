@@ -36,6 +36,6 @@ func (v ByteVec) Length() int {
 }
 
 @func "make-bvec" 1 1 {
-  //@arg len 0 Int
+  @arg len 0 Int
   return ByteVec(make([]byte, int(len)))
 }

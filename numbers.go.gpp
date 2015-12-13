@@ -5,272 +5,152 @@ import (
   "fmt"
 )
 
+#import "macros.gpp"
 
-func init() {
-  Core.Function("number?", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("number?", 1, 1, args)
-    if _, ok := args[0].(Int); ok  {
+#define operator op {
+  @func "@op" 1 -1 {
+    #define icase atype btype aconv bconv { case @btype: result = @atype(@aconv(a) @op @bconv(b)) }
+    result = args[0]
+    for _, arg := range args[1:] {
+      switch a := result.(type) {
+      case Int:
+        switch b := arg.(type) {
+        @icase(Int, Int, , )
+        @icase(Float, Float, Float, )
+        default:
+          panic("bad-type")
+        }
+      case Float:
+        switch b := args[1].(type) {
+        @icase(Float, Int, , Float)
+        @icase(Float, Float, , )
+        default:
+          panic("bad-type")
+        }
+      default:
+        panic("bad-type")
+      }
+    }
+    return
+  }
+}
+
+#define unary_func name Name {
+  @func @name 1 1 {
+    @arg f 0 Float
+    return Float(math.@Name(float64(f)))
+    panic("bad-type")
+  }
+}
+
+@func "number?" 1 1 {
+  if @is_a(args[0], Int) {
     return T
   }
-  if _, ok := args[0].(Float); ok  {
+  if @is_a(args[0], Float) {
     return T
   }
   return Nil
-})
 }
 
-func init() {
-  Core.Function("exact?", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("exact?", 1, 1, args)
-    if _, ok := args[0].(Int); ok  {
+@func "exact?" 1 1 {
+  if @is_a(args[0], Int) {
     return T
   }
-  if _, ok := args[0].(Float); ok  {
+  @try_ok _, ok := args[0].(Float)
+  return Nil
+}
+
+@func "nan?" 1 1 {
+  if @is_a(args[0], Int) {
     return Nil
   }
-  panic("bad-type")
-})
-}
-
-func init() {
-  Core.Function("nan?", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("nan?", 1, 1, args)
-    if _, ok := args[0].(Int); ok  {
+  @try_ok f, ok := args[0].(Float)
+  if math.IsNaN(float64(f)) {
+    return T
+  } else {
     return Nil
   }
-  if it, ok := args[0].(Float); ok  {
-    if math.IsNaN(float64(it)) {
-      return T
-    } else {
-      return Nil
-    }
+}
+
+@operator +
+
+@operator -
+
+@operator *
+
+@operator /
+
+@func "%" 1 -1 {
+	result = args[0]
+	for _, arg := range args[1:] {
+		switch a := result.(type) {
+		case Int:
+			switch b := arg.(type) {
+			case Int:
+				result = Int(a % b)
+			case Float:
+				result = Float(math.Mod(float64(a), float64(b)))
+			default:
+				panic("bad-type")
+			}
+		case Float:
+			switch b := args[1].(type) {
+			case Int:
+				result = Float(math.Mod(float64(a), float64(b)))
+			case Float:
+				result = Float(math.Mod(float64(a), float64(b)))
+			default:
+				panic("bad-type")
+			}
+		default:
+			panic("bad-type")
+		}
+	}
+	return
+}
+
+@func "abs" 1 1 {
+  if @it_is_a(f, args[0], Float) {
+		return Float(math.Abs(float64(f)))
+	}
+  @arg i 0 Int
+  if i < 0 {
+    return Int(-i)
   }
-  panic("bad-type")
-})
+  return i
 }
 
-func init() {
-  Core.Function("+", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("+", 1, -1, args)
-    result = args[0]
-    for _, arg := range args[1:] {
-      switch a := result.(type) {
-      case Int:
-        switch b := arg.(type) {
-        case Int: result = Int((a) + (b)) 
-        case Float: result = Float(Float(a) + (b)) 
-        default:
-          panic("bad-type")
-        }
-      case Float:
-        switch b := args[1].(type) {
-        case Int: result = Float((a) + Float(b)) 
-        case Float: result = Float((a) + (b)) 
-        default:
-          panic("bad-type")
-        }
-      default:
-        panic("bad-type")
-      }
-    }
-    return
-  })
-}
+@unary_func "floor" Floor
 
-func init() {
-  Core.Function("-", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("-", 1, -1, args)
-    result = args[0]
-    for _, arg := range args[1:] {
-      switch a := result.(type) {
-      case Int:
-        switch b := arg.(type) {
-        case Int: result = Int((a) - (b)) 
-        case Float: result = Float(Float(a) - (b)) 
-        default:
-          panic("bad-type")
-        }
-      case Float:
-        switch b := args[1].(type) {
-        case Int: result = Float((a) - Float(b)) 
-        case Float: result = Float((a) - (b)) 
-        default:
-          panic("bad-type")
-        }
-      default:
-        panic("bad-type")
-      }
-    }
-    return
-  })
-}
+@unary_func "trunc" Trunc
 
-func init() {
-  Core.Function("*", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("*", 1, -1, args)
-    result = args[0]
-    for _, arg := range args[1:] {
-      switch a := result.(type) {
-      case Int:
-        switch b := arg.(type) {
-        case Int: result = Int((a) * (b)) 
-        case Float: result = Float(Float(a) * (b)) 
-        default:
-          panic("bad-type")
-        }
-      case Float:
-        switch b := args[1].(type) {
-        case Int: result = Float((a) * Float(b)) 
-        case Float: result = Float((a) * (b)) 
-        default:
-          panic("bad-type")
-        }
-      default:
-        panic("bad-type")
-      }
-    }
-    return
-  })
-}
+@unary_func "ceil" Ceil
 
-func init() {
-  Core.Function("/", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("/", 1, -1, args)
-    result = args[0]
-    for _, arg := range args[1:] {
-      switch a := result.(type) {
-      case Int:
-        switch b := arg.(type) {
-        case Int: result = Int((a) / (b)) 
-        case Float: result = Float(Float(a) / (b)) 
-        default:
-          panic("bad-type")
-        }
-      case Float:
-        switch b := args[1].(type) {
-        case Int: result = Float((a) / Float(b)) 
-        case Float: result = Float((a) / (b)) 
-        default:
-          panic("bad-type")
-        }
-      default:
-        panic("bad-type")
-      }
-    }
-    return
-  })
-}
+@unary_func "sin" Sin
 
+@unary_func "cos" Cos
 
-func init() {
-  Core.Function("%", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("%", 1, -1, args)
-    accum := args[0]
-  for _, arg := range args[1:] {
-    switch a := accum.(type) {
-    case Int:
-      switch b := arg.(type) {
-      case Int:
-        accum = Int(a % b)
-      case Float:
-        accum = Float(math.Mod(float64(a), float64(b)))
-      default:
-        panic("bad-type")
-      }
-    case Float:
-      switch b := args[1].(type) {
-      case Int:
-        accum = Float(math.Mod(float64(a), float64(b)))
-      case Float:
-        accum = Float(math.Mod(float64(a), float64(b)))
-      default:
-        panic("bad-type")
-      }
-    default:
-      panic("bad-type")
-    }
+@unary_func "tan" Tan
+
+@unary_func "asin" Asin
+
+@unary_func "acos" Acos
+
+@unary_func "atan" Atan
+
+@func "num->str" 1 1 {
+  if @it_is_a(i, args[0], Int) {
+    return Str(fmt.Sprintf("%d", i))
   }
-  return accum
-})
+  @arg f 0 Float
+  return Str(fmt.Sprintf("%f", f))
 }
 
-func init() {
-  Core.Function("abs", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("abs", 1, 1, args)
-    if it, ok := args[0].(Int); ok  {
-      return Int(math.Abs(float64(it)))
-    }
-    if it, ok := args[0].(Float); ok  {
-      return Float(math.Abs(float64(it)))
-    }
-    panic("bad-type")
-  })
-}
-
-func init() {
-  Core.Function("floor", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("floor", 1, 1, args)
-    if it, ok := args[0].(Int); ok  {
-      return Int(math.Floor(float64(it)))
-    }
-    if it, ok := args[0].(Float); ok  {
-      return Float(math.Floor(float64(it)))
-    }
-    panic("bad-type")
-  })
-}
-
-func init() {
-  Core.Function("truncate", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("truncate", 1, 1, args)
-    if it, ok := args[0].(Int); ok  {
-      return Int(math.Trunc(float64(it)))
-    }
-    if it, ok := args[0].(Float); ok  {
-      return Float(math.Trunc(float64(it)))
-    }
-    panic("bad-type")
-  })
-}
-
-func init() {
-  Core.Function("ceiling", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("ceiling", 1, 1, args)
-    if it, ok := args[0].(Int); ok  {
-      return Int(math.Ceil(float64(it)))
-    }
-    if it, ok := args[0].(Float); ok  {
-      return Float(math.Ceil(float64(it)))
-    }
-    panic("bad-type")
-  })
-}
-
-
-func init() {
-  Core.Function("number->string", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("number->string", 1, 1, args)
-    if it, ok := args[0].(Int); ok  {
-    return Str(fmt.Sprintf("%d", it))
-  }
-  if it, ok := args[0].(Float); ok  {
-    return Str(fmt.Sprintf("%f", it))
-  }
-  panic("bad-type")
-})
-}
-
-func init() {
-  Core.Function("string->number", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("string->number", 1, 1, args)
-    str, ok := args[0].(Str)
-  if !ok {
-    panic("bad-type")
-  }
-
+@func "str->num" 1 1 {
+  @arg str 0 Str
   if v := tryAtomAsNumber(string(str)); v != nil {
     return v
   }
   panic("bad-syntax")
-})
 }

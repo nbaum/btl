@@ -1,6 +1,8 @@
 package golem
 
-import "fmt"
+import (
+  "fmt"
+)
 
 type Char rune
 
@@ -22,18 +24,11 @@ func (c Char) String() string {
 }
 
 @func "char->int" 1 1 {
-  //@arg char 0 Char
+  @arg char 0 Char
   return Int(char)
 }
 
-func init() {
-  Core.Function("int->char", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("int->char", 1, 1, args)
-    it, ok := args[0].(Int)
-  if !ok {
-    panic("bad-type")
-  }
-
-  return Char(it)
-})
+@func "int->char" 1 1 {
+  @arg i 0 Int
+  return Char(i)
 }

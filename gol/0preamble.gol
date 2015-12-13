@@ -1,0 +1,10 @@
+(set assert
+  (tag 'macro
+    (fn (expr)
+      (list
+        'if
+        expr
+        t
+        (list 'die (list 'quote expr))))))
+
+(assert t)

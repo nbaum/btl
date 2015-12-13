@@ -25,10 +25,7 @@ func (*Lambda) Type() Value {
   return Intern("lambda")
 }
 
-func (l *Lambda) Apply(e *Env, v Value) (val Value) {
-  args := Map(v, func(_ int, arg Value) Value{
-    return Eval(e, arg, Variables)
-  })
+func (l *Lambda) Apply(e *Env, args Value) (val Value) {
   frame := NewEnv(l.env)
   frame.Bind(Variables, Intern("caller"), e)
   frame.DestructuringBind(Variables, l.places, args)

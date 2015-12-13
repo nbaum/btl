@@ -40,7 +40,21 @@ func (*Cons) Type() Value {
 }
 
 func (c *Cons) Eval(e *Env, ns Namespace) Value {
-  return Apply(e, Eval(e, c.car, Functions), c.cdr)
+  fn := Eval(e, c.car, Functions)
+  args := c.cdr
+  switch fn := fn.(type) {
+  case *Special:
+    goto just_do_it
+  case *Tagged:
+    if fn.tag == Intern("macro") {
+      return Eval(e, Apply(e, fn.rep, args), Variables)
+    }
+  }
+  args = Map(args, func(_ int, arg Value) Value{
+    return Eval(e, arg, Variables)
+  })
+just_do_it:
+  return Apply(e, fn, args)
 }
 
 func (c *Cons) String() string {

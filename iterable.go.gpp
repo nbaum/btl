@@ -1,5 +1,7 @@
 package golem
 
+#import "macros.gpp"
+
 type Iterable interface {
   Value
   Length() int
@@ -8,83 +10,30 @@ type Iterable interface {
   Slice(int, int) Iterable
 }
 
+@type_predicate "iterable?" Iterable
 
-func init() {
-  Core.Function("iterable?", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("iterable?", 1, 1, args)
-    if _, ok := args[0].(Iterable); ok  {
-    return T
-  } else {
-    return Nil
-  }
-})
+@func "len" 1 1 {
+  @arg iter 0 Iterable
+  return Int(iter.Length())
 }
 
-func init() {
-  Core.Function("length", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("length", 1, 1, args)
-    it, ok := args[0].(Iterable)
-  if !ok {
-    panic("bad-type")
-  }
-
-  return Int(it.Length())
-})
+@func "slice" 3 3 {
+  @arg iter 0 Iterable
+  @arg start 1 Int
+  @arg end 2 Int
+  return iter.Slice(int(start), int(end))
 }
 
-func init() {
-  Core.Function("slice", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("slice", 3, 3, args)
-    it, ok := args[0].(Iterable)
-  if !ok {
-    panic("bad-type")
-  }
-
-  start, ok := args[1].(Int)
-  if !ok {
-    panic("bad-type")
-  }
-
-  end, ok := args[2].(Int)
-  if !ok {
-    panic("bad-type")
-  }
-
-  return it.Slice(int(start), int(end))
-})
+@func "nth" 2 2 {
+  @arg iter 0 Iterable
+  @arg idx 1 Int
+  return iter.Ref(int(idx))
 }
 
-func init() {
-  Core.Function("nth", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("nth", 2, 2, args)
-    it, ok := args[0].(Iterable)
-  if !ok {
-    panic("bad-type")
-  }
-
-  idx, ok := args[1].(Int)
-  if !ok {
-    panic("bad-type")
-  }
-
-  return it.Ref(int(idx))
-})
-}
-
-func init() {
-  Core.Function("nth=", func(env *Env, args[]Value) (result Value) {
-    CheckArgs("nth=", 3, 3, args)
-    it, ok := args[0].(Iterable)
-  if !ok {
-    panic("bad-type")
-  }
-
-  idx, ok := args[1].(Int)
-  if !ok {
-    panic("bad-type")
-  }
-
-  it.SetRef(int(idx), args[2])
-  return args[2]
-})
+@func "nth=" 3 3 {
+  @arg iter 0 Iterable
+  @arg idx 1 Int
+  @arg val 2 Value
+  iter.SetRef(int(idx), val)
+  return val
 }
