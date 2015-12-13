@@ -1,0 +1,54 @@
+package golem
+
+import "fmt"
+
+type Fn struct {
+  proc func(*Env, []Value)Value
+  name *Sym
+}
+
+func NewFn(name *Sym, proc func(*Env, []Value)Value) *Fn {
+  return &Fn{name: name, proc: proc}
+}
+
+func (f *Fn) String() string {
+  if f.name != nil {
+    return fmt.Sprintf("#<fn: %s>", f.name)
+  } else {
+    return fmt.Sprintf("#<fn@ %p>", f)
+  }
+}
+
+func (f *Fn) Type() Value {
+  return Intern("fn")
+}
+
+func (f *Fn) Apply(e *Env, v Value) Value {
+  args := ToVec(Map(v, func(i int, arg Value) Value{
+    return Eval(e, arg, Variables)
+  }))
+  return f.proc(e, args)
+}
+
+func init() {
+  Core.Function("environment?", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("environment?", 1, 1, args)
+    if _, ok := args[0].(*Env); ok  {
+    return T
+  } else {
+    return Nil
+  }
+})
+}
+
+func init() {
+  Core.Function("env", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("env", 1, 1, args)
+    if args[0] == Nil {
+    return NewEnv(nil)
+  } else if it, ok := args[0].(*Env); ok  {
+    return NewEnv(it)
+  }
+  panic("bad-type")
+})
+}

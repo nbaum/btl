@@ -1,30 +1,120 @@
-;; Comments
+;; All values
+(is? 1 1)
+(is? '(1 2) '(1 2))
+(is? 1 "1")
+(not t)
+(not nil)
 
-;; Integers
-1
-23
-42
-1e9
+;; Numbers
+(number? 1)
+(number? 1.0)
+(number? "1")
 
-;; Floats
-1.0
-1.0e9
+(exact? 1)
+(exact? 1.0)
 
-;; Lists
-'(1 2 3 4)
-'(1 2 3 4 . 5)
+(+ 3 3)
+(+ 3 3.0)
+(+ 3.0 3.0)
 
-;; Vectors
-'[1 2 3 4]
+(* 3 3)
+(- 3 3)
+(/ 3 3)
+(% 3 3)
 
-;; Tabs
-'{a 1 b 2 c 3}
+(* 3)
+(- 3)
+(/ 3)
+(% 3)
 
-;; Types
-(type 1)
-(type 1.0)
-(type '(1 2 3 4))
-(type '())
-(type 'foo)
-(type '[1 2 3 4])
-(type '{1 2 3 4})
+(nan? 1)
+(nan? 1.0)
+(nan? (/ 0.0 0.0))
+
+(abs -1)
+(floor -1.5)
+(truncate -1.5)
+(ceiling -1.5)
+
+(number->string 42)
+(string->number "42")
+
+cons? ; (comparable and ordered)
+  cons
+  car
+  cdr
+  car=
+  cdr=
+
+symbol? ; (comparable)
+  symbol->string
+  string->symbol
+
+char? ; (comparable and ordered)
+  char->int
+  int->char
+
+iterable?
+  length
+  nth
+  nth=
+  slice
+
+; list? ; (comparable and ordered)
+
+string? ; (comparable and ordered and iterable)
+  make-string
+
+vector? ; (comparable and ordered and iterable)
+  make-vector
+
+bytevector? ; (comparable and ordered and iterable)
+  make-bytevector
+
+applicable?
+  catch
+  unwind-protect
+
+tagged?
+  tag
+  rep
+
+environment?
+  env
+
+port?
+  input-port?
+    read
+    read-char
+    peek-char
+    read-byte
+    peek-byte
+    read-bytes
+    read-string
+  output-port?
+    write
+    write-char
+    write-byte
+    write-bytes
+    write-string
+    flush
+  ;file-port?
+    open-input-file
+    open-output-file
+  ;string-port?
+    open-input-string
+    open-output-string
+    get-output-string
+  ;byte-port?
+    open-input-bytevector
+    open-output-bytevector
+    get-output-bytes
+  close
+
+file-exists?
+dir-exists?
+delete-file
+args
+exit
+getenv
+time

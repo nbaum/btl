@@ -4,28 +4,28 @@ import (
   "fmt"
 )
 
-func Throw(v interface{}) {
+func Throw(v interface{}) error {
   if e, ok := v.(error); ok {
-    panic(e)
+    return e
   } else {
-    panic(fmt.Errorf("%s", v))
+    return fmt.Errorf("%s", v)
   }
 }
 
-func Signal(name string, args ...interface{}) {
+func Signal(name string, args ...interface{}) *Cons {
   sym := Intern(name)
   tab := SymTab(args...)
-  panic(NewCons(sym, tab))
+  return NewCons(sym, tab)
 }
 
 func CatchError(err *error) {
-  if p := recover(); p != nil {
-    if e, ok := p.(error); ok {
-      *err = e
-    } else {
-      *err = fmt.Errorf("%s", p)
-    }
-  }
+  // if p := recover(); p != nil {
+  //   if e, ok := p.(error); ok {
+  //     *err = e
+  //   } else {
+  //     *err = fmt.Errorf("%s", p)
+  //   }
+  // }
 }
 
 func CatchValue(val *Value) {

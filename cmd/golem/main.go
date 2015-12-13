@@ -16,13 +16,13 @@ func runFile(env *g.Env, path string) (err error) {
   for {
     form := env.Read(buf)
     fmt.Println(">", form)
-    value := g.Eval(env, form)
+    value := g.Eval(env, form, g.Variables)
     fmt.Println(value)
   }
 }
 
 func main() {
-  env := g.NewEnv(nil)
+  env := g.NewEnv(g.Core)
   for _, arg := range os.Args[1:] {
     if err := runFile(env, arg); err != nil {
       fmt.Println(err)

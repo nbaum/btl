@@ -1,0 +1,52 @@
+package golem
+
+
+func init() {
+  Core.Function("applicable?", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("applicable?", 1, 1, args)
+    if _, ok := args[0].(Applicator); ok  {
+    return T
+  } else {
+    return Nil
+  }
+})
+}
+
+func init() {
+  Core.Function("catch", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("catch", 1, 1, args)
+    try, ok := args[0].(Applicator)
+  if !ok {
+    panic("bad-type")
+  }
+
+  _ = try
+  return Nil
+})
+}
+
+func init() {
+  Core.Function("unwind-protect", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("unwind-protect", 2, 2, args)
+    try, ok := args[0].(Applicator)
+  if !ok {
+    panic("bad-type")
+  }
+
+  finally, ok := args[1].(Applicator)
+  if !ok {
+    panic("bad-type")
+  }
+
+  catch, ok := args[1].(Applicator)
+  if !ok {
+    panic("bad-type")
+  }
+
+  //return Int(it.Length())
+  _ = try
+  _ = finally
+  _ = catch
+  return Nil
+})
+}

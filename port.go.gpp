@@ -1,0 +1,551 @@
+package golem
+
+import (
+  "bufio"
+  "bytes"
+  "fmt"
+  "io"
+  "os"
+  "strings"
+)
+
+
+type InputPort struct {
+  reader interface{}
+  closer io.Closer
+}
+
+type OutputPort struct {
+  writer interface{}
+  closer io.Closer
+}
+
+func (p *InputPort) Close() error {
+  if p.closer != nil {
+    err := p.closer.Close()
+  if err != nil {
+    panic(err)
+  }
+    p.reader = nil
+    p.closer = nil
+  }
+  return nil
+}
+
+func (p *OutputPort) Close() error {
+  if p.closer != nil {
+    err := p.closer.Close()
+  if err != nil {
+    panic(err)
+  }
+    p.writer = nil
+    p.closer = nil
+  }
+  return nil
+}
+
+func (p *InputPort) String() string {
+  return "<input-port>"
+}
+
+func (p *InputPort) Type() Value {
+  return Intern("input-port")
+}
+
+func (p *OutputPort) String() string {
+  return "<output-port>"
+}
+
+func (p *OutputPort) Type() Value {
+  return Intern("output-port")
+}
+
+func init() {
+  Core.Function("port?", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("port?", 1, 1, args)
+    if _, ok := args[0].(*InputPort); ok  {
+    return T
+  } else if _, ok := args[0].(*OutputPort); ok  {
+    return T
+  } else {
+    return Nil
+  }
+})
+}
+
+func init() {
+  Core.Function("open?", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("open?", 1, 1, args)
+    if it, ok := args[0].(*InputPort); ok  {
+    if it.reader != nil {
+      return T
+    }
+    return Nil
+  } else if it, ok := args[0].(*OutputPort); ok  {
+    if it.writer != nil {
+      return T
+    }
+    return Nil
+  } else {
+    panic("bad-type")
+  }
+})
+}
+
+func init() {
+  Core.Function("input-port?", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("input-port?", 1, 1, args)
+    if _, ok := args[0].(*InputPort); ok  {
+    return T
+  } else {
+    return Nil
+  }
+})
+}
+
+func init() {
+  Core.Function("read", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("read", 1, 1, args)
+    it, ok := args[0].(*InputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  reader, ok := it.reader.(io.Reader)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return env.Read(NewScanner(reader))
+})
+}
+
+func init() {
+  Core.Function("read-char", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("read-char", 1, 1, args)
+    it, ok := args[0].(*InputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  reader, ok := it.reader.(io.RuneReader)
+  if !ok {
+    panic("bad-type")
+  }
+
+  r, _, err := reader.ReadRune()
+  if err != nil {
+    panic(err)
+  }
+  return Int(r)
+})
+}
+
+func init() {
+  Core.Function("peek-char", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("peek-char", 1, 1, args)
+    it, ok := args[0].(*InputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  reader, ok := it.reader.(io.RuneScanner)
+  if !ok {
+    panic("bad-type")
+  }
+
+  r, _, err := reader.ReadRune()
+  if err != nil {
+    panic(err)
+  }
+  reader.UnreadRune()
+  return Int(r)
+})
+}
+
+func init() {
+  Core.Function("read-string", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("read-string", 2, 2, args)
+    it, ok := args[0].(*InputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  reader, ok := it.reader.(io.Reader)
+  if !ok {
+    panic("bad-type")
+  }
+
+  len, ok := args[0].(Int)
+  if !ok {
+    panic("bad-type")
+  }
+
+  buf := make([]byte, int(len))
+  _, err := reader.Read(buf)
+  if err != nil {
+    panic(err)
+  }
+  return Str(buf)
+})
+}
+
+func init() {
+  Core.Function("read-byte", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("read-byte", 1, 1, args)
+    it, ok := args[0].(*InputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  reader, ok := it.reader.(io.ByteReader)
+  if !ok {
+    panic("bad-type")
+  }
+
+  b, err := reader.ReadByte()
+  if err != nil {
+    panic(err)
+  }
+  return Int(b)
+})
+}
+
+func init() {
+  Core.Function("peek-byte", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("peek-byte", 1, 1, args)
+    it, ok := args[0].(*InputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  reader, ok := it.reader.(io.ByteScanner)
+  if !ok {
+    panic("bad-type")
+  }
+
+  b, err := reader.ReadByte()
+  if err != nil {
+    panic(err)
+  }
+  reader.UnreadByte()
+  return Int(b)
+})
+}
+
+func init() {
+  Core.Function("read-bytes", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("read-bytes", 2, 2, args)
+    it, ok := args[0].(*InputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  reader, ok := it.reader.(io.Reader)
+  if !ok {
+    panic("bad-type")
+  }
+
+  len, ok := args[0].(Int)
+  if !ok {
+    panic("bad-type")
+  }
+
+  buf := make([]byte, int(len))
+  _, err := reader.Read(buf)
+  if err != nil {
+    panic(err)
+  }
+  return ByteVec(buf)
+})
+}
+
+func init() {
+  Core.Function("output-port?", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("output-port?", 1, 1, args)
+    if _, ok := args[0].(*OutputPort); ok  {
+    return T
+  } else {
+    return Nil
+  }
+})
+}
+
+func init() {
+  Core.Function("write", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("write", 2, 2, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(io.Writer)
+  if !ok {
+    panic("bad-type")
+  }
+
+  _, err := fmt.Fprint(writer, args[1])
+  if err != nil {
+    panic(err)
+  }
+  return args[1]
+})
+}
+
+type RuneWriter interface {
+  WriteRune(rune) (int, error)
+}
+
+func init() {
+  Core.Function("write-char", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("write-char", 2, 2, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(RuneWriter)
+  if !ok {
+    panic("bad-type")
+  }
+
+  ch, ok := args[1].(Char)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer.WriteRune(rune(ch))
+  return ch
+})
+}
+
+func init() {
+  Core.Function("write-byte", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("write-byte", 2, 2, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(io.ByteWriter)
+  if !ok {
+    panic("bad-type")
+  }
+
+  i, ok := args[1].(Int)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer.WriteByte(byte(i))
+  return i
+})
+}
+
+func init() {
+  Core.Function("write-bytes", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("write-bytes", 2, 2, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(io.Writer)
+  if !ok {
+    panic("bad-type")
+  }
+
+  vec, ok := args[1].(ByteVec)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer.Write(([]byte)(vec))
+  return vec
+})
+}
+
+func init() {
+  Core.Function("write-string", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("write-string", 2, 2, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(io.Writer)
+  if !ok {
+    panic("bad-type")
+  }
+
+  str, ok := args[1].(Str)
+  if !ok {
+    panic("bad-type")
+  }
+
+  fmt.Fprint(writer, string(str))
+  return str
+})
+}
+
+type Flusher interface {
+  Flush() (error)
+}
+
+func init() {
+  Core.Function("flush", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("flush", 1, 1, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(Flusher)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer.Flush()
+  return args[0]
+})
+}
+
+func init() {
+  Core.Function("open-input-file", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("open-input-file", 1, 1, args)
+    path, ok := args[0].(Str)
+  if !ok {
+    panic("bad-type")
+  }
+
+  io, err := os.Open(string(path))
+  if err != nil {
+    panic(err)
+  }
+  return &InputPort{bufio.NewReader(io), io}
+})
+}
+
+func init() {
+  Core.Function("open-output-file", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("open-output-file", 1, 1, args)
+    path, ok := args[0].(Str)
+  if !ok {
+    panic("bad-type")
+  }
+
+  io, err := os.Create(string(path))
+  if err != nil {
+    panic(err)
+  }
+  return &OutputPort{bufio.NewWriter(io), io}
+})
+}
+
+func init() {
+  Core.Function("open-input-string", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("open-input-string", 1, 1, args)
+    str, ok := args[0].(Str)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return &InputPort{strings.NewReader(string(str)), nil}
+})
+}
+
+func init() {
+  Core.Function("open-output-string", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("open-output-string", 0, 0, args)
+    buf := new(bytes.Buffer)
+  return &OutputPort{buf, nil}
+})
+}
+
+func init() {
+  Core.Function("get-output-string", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("get-output-string", 1, 1, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(bytes.Buffer)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return Str(writer.String())
+})
+}
+
+func init() {
+  Core.Function("open-input-bytevector", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("open-input-bytevector", 1, 1, args)
+    vec, ok := args[0].(ByteVec)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return &InputPort{bytes.NewReader(([]byte)(vec)), nil}
+})
+}
+
+func init() {
+  Core.Function("open-output-bytevector", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("open-output-bytevector", 0, 0, args)
+    buf := new(bytes.Buffer)
+  return &OutputPort{buf, nil}
+})
+}
+
+func init() {
+  Core.Function("get-output-bytes", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("get-output-bytes", 1, 1, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(bytes.Buffer)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return ByteVec(writer.Bytes())
+})
+}
+
+func init() {
+  Core.Function("get-output-bytes", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("get-output-bytes", 1, 1, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(bytes.Buffer)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return ByteVec(writer.Bytes())
+})
+}
+
+func init() {
+  Core.Function("close", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("close", 1, 1, args)
+    it, ok := args[0].(*OutputPort)
+  if !ok {
+    panic("bad-type")
+  }
+
+  writer, ok := it.writer.(bytes.Buffer)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return ByteVec(writer.Bytes())
+})
+}

@@ -29,7 +29,7 @@ func SymTab(args ...interface{}) Tab {
 }
 
 func (Tab) Type() Value {
-  return List(Intern("tab"), Intern("*"), Intern("*"))
+  return List(Intern("tab"), Intern("t"), Intern("t"))
 }
 
 func (t Tab) String() (s string) {

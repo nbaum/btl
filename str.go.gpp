@@ -1,0 +1,35 @@
+package golem
+
+type Str string
+
+func (Str) Type() Value {
+  return Intern("str")
+}
+
+func (s Str) String() string {
+  return "\"" + string(s) + "\""
+}
+
+
+func init() {
+  Core.Function("string?", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("string?", 1, 1, args)
+    if _, ok := args[0].(Str); ok  {
+    return T
+  } else {
+    return Nil
+  }
+})
+}
+
+func init() {
+  Core.Function("make-string", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("make-string", 1, 1, args)
+    len, ok := args[0].(Int)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return Str(string(make([]byte, int(len))))
+})
+}

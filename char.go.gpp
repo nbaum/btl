@@ -1,0 +1,39 @@
+package golem
+
+import "fmt"
+
+type Char rune
+
+func (Char) Type() Value {
+  return Intern("char")
+}
+
+func (c Char) String() string {
+  return fmt.Sprintf("\\%d", c)
+}
+
+#import "macros.gpp"
+
+@func "char?" 1 1 {
+  if @is_a(args[0], Char) {
+    return T
+  }
+  return Nil
+}
+
+@func "char->int" 1 1 {
+  //@arg char 0 Char
+  return Int(char)
+}
+
+func init() {
+  Core.Function("int->char", func(env *Env, args[]Value) (result Value) {
+    CheckArgs("int->char", 1, 1, args)
+    it, ok := args[0].(Int)
+  if !ok {
+    panic("bad-type")
+  }
+
+  return Char(it)
+})
+}
