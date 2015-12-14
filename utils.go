@@ -19,13 +19,13 @@ func Signal(name string, args ...interface{}) *Cons {
 }
 
 func CatchError(err *error) {
-  // if p := recover(); p != nil {
-  //   if e, ok := p.(error); ok {
-  //     *err = e
-  //   } else {
-  //     *err = fmt.Errorf("%s", p)
-  //   }
-  // }
+  if p := recover(); p != nil {
+    if e, ok := p.(error); ok {
+      *err = e
+    } else {
+      *err = fmt.Errorf("%s", p)
+    }
+  }
 }
 
 func CatchValue(val *Value) {

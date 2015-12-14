@@ -1,3 +1,9 @@
+(set list (fn args args))
+(set defun (tag 'macro (fn (name args . rest) (list 'set name (list 'fn args . rest)))))
+
+(defun cadr (x)
+  (car cdr (x)))
+
 (set assert
   (tag 'macro
     (fn (expr)
@@ -5,6 +11,22 @@
         'if
         expr
         t
-        (list 'die (list 'quote expr))))))
+        (list 'die (list 'quote (list 'assertion-failed expr)))))))
 
-(assert t)
+(set qq
+  (fn (x)
+    (if (cons? x)
+      (if (is? 'unquote (car x))
+          (cadr x)
+        (if (is? 'quasiquote (car x))
+            (qq (qq cadr x))
+            (if (cons? (car x))
+                (if (is? 'unquote-splicing (caar x))
+                    (list 'append (cadar x) (qq (cdr x)))
+                    (list 'cons (qq (car x)) (qq (cdr x))))
+                (list 'cons (qq (car x)) (qq (cdr x))))))
+      (list 'quote x))))
+
+(set quasiquote (tag 'macro (fn (x) (qq x))))
+
+`,foo

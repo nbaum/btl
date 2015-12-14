@@ -1,6 +1,7 @@
 package golem
 
 import (
+	"fmt"
 	"os"
 	"time"
 )
@@ -77,6 +78,18 @@ func init() {
 		}
 		os.Exit(int(status))
 		return Nil
+	})
+}
+
+func init() {
+	Core.Function("die", func(env *Env, args []Value) (result Value) {
+		CheckArgs("die", 1, 1, args)
+		arg0, ok := args[0].(Value)
+		message := arg0
+		if !ok {
+			panic("bad-type")
+		}
+		panic(fmt.Sprint(message))
 	})
 }
 

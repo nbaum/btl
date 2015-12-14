@@ -1,6 +1,7 @@
 package golem
 
 import (
+  "fmt"
   "os"
   "time"
 )
@@ -40,6 +41,11 @@ import (
   @arg status 0 Int
   os.Exit(int(status))
   return Nil
+}
+
+@func "die" 1 1 {
+  @arg message 0 Value
+  panic(fmt.Sprint(message))
 }
 
 @func "getenv" 1 1 {
